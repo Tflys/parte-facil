@@ -51,27 +51,32 @@ python app.py
 Abre http://127.0.0.1:5000 en tu navegador.
 
 📂 Estructura del proyecto
-<details> <summary>Ver estructura</summary>
+<details>
+  <summary>Ver estructura</summary>
 
-multiservicios-ortiz/<br>
-├── app.py<br>
-├── forms.py<br>
-├── models.py<br>
-├── requirements.txt<br>
-├── /instance/<br>
-│     └── multiservicios.db<br>
-├── /static/<br>
-│     ├── images/<br>
-│     │     ├── favicon.ico<br>
-│     │     └── ...<br>
-│     └── uploads/<br>
-├── /templates/<br>
-│     ├── base.html<br>
-│     ├── navbar.html<br>
-│     ├── footer.html<br>
-│     ├── dashboard.html<br>
-│     └── ...<br>
-└── README.md<br>
+  <pre>
+
+multiservicios-ortiz/
+├── app.py
+├── forms.py
+├── models.py
+├── requirements.txt
+├── /instance/
+│     └── multiservicios.db
+├── /static/
+│     ├── images/
+│     │     ├── favicon.ico
+│     │     └── ...
+│     └── uploads/
+├── /templates/
+│     ├── base.html
+│     ├── navbar.html
+│     ├── footer.html
+│     ├── dashboard.html
+│     └── ...
+└── README.md
+
+  </pre>
 </details>
 🛠️ Funcionalidades principales
 🧑‍💼 Gestión de usuarios (administrador y trabajador)
