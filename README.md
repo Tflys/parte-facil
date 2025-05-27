@@ -1,39 +1,57 @@
-📚 Documentación: Multiservicios Desatascos Ortiz S.L.
-1. Descripción general
-Multiservicios Desatascos Ortiz S.L. es una aplicación web interna para la gestión de partes de trabajo, empleados y clientes.
- La plataforma permite la organización, asignación y control de trabajos diarios, incluyendo control de horas, subida de imágenes/firma y estadísticas.
- Cuenta con un sistema de roles (administrador y trabajador) y es totalmente responsive.
+# 🚰 Multiservicios Desatascos Ortiz S.L.
 
-2. Instalación y primeros pasos
-Requisitos
-Python 3.10 o superior
+> Aplicación web interna para la gestión de partes de trabajo, empleados y clientes.
+
+---
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54"/>
+  <img src="https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white"/>
+  <img src="https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white"/>
+  <img src="https://img.shields.io/badge/FullCalendar-3a85ff?style=for-the-badge&logo=fullcalendar&logoColor=white"/>
+</p>
+
+---
+
+## 📋 Descripción
+
+**Multiservicios Desatascos Ortiz S.L.** es una plataforma web para el control y gestión de trabajos, empleados y clientes, con partes de trabajo, asignación de tareas, calendario avanzado y estadísticas.  
+La app es responsive y segura, con sistema de roles: **Administrador** y **Trabajador**.
+
+---
+
+## 🚀 Tecnologías usadas
+
+| Tecnología    | Descripción                          |
+| ------------- | ------------------------------------ |
+| [Flask](https://flask.palletsprojects.com/)         | Framework web ligero en Python |
+| [SQLAlchemy](https://www.sqlalchemy.org/)           | ORM para la gestión de base de datos |
+| [WTForms](https://wtforms.readthedocs.io/)          | Formularios seguros y validados |
+| [Bootstrap 5](https://getbootstrap.com/)            | Framework CSS responsive        |
+| [FullCalendar](https://fullcalendar.io/)            | Calendario interactivo JS       |
+| [SQLite](https://www.sqlite.org/)                   | Base de datos ligera por defecto |
+| [Werkzeug Security](https://werkzeug.palletsprojects.com/) | Hash de contraseñas |
+| [Jinja2](https://jinja.palletsprojects.com/)        | Motor de plantillas en Flask    |
+
+---
+
+## 🏁 Instalación rápida
 
 
-(Opcional: XAMPP/WAMP/MAMP si usas MySQL, pero el proyecto parte de SQLite)
-
-
-Pip
-
-
-Instalación
-1.- Clona el repositorio
 git clone https://github.com/TuUsuario/multiservicios-ortiz.git
 cd multiservicios-ortiz
-2.- Crea y activa el entorno virtual
 python -m venv venv
-# En Windows:
+# Windows:
 venv\Scripts\activate
-# En Linux/Mac:
+# Linux/Mac:
 source venv/bin/activate
-3.- Instala dependencias
 pip install -r requirements.txt
-4.-Lanza la aplicación
 python app.py
- Accede a http://127.0.0.1:5000
+Abre http://127.0.0.1:5000 en tu navegador.
 
-
-
-3. Estructura de carpetas
+📂 Estructura del proyecto
+<details> <summary>Ver estructura</summary>
 
 multiservicios-ortiz/
 ├── app.py
@@ -45,7 +63,6 @@ multiservicios-ortiz/
 ├── /static/
 │     ├── images/
 │     │     ├── favicon.ico
-│     │     ├── favicon-16x16.png
 │     │     └── ...
 │     └── uploads/
 ├── /templates/
@@ -53,152 +70,67 @@ multiservicios-ortiz/
 │     ├── navbar.html
 │     ├── footer.html
 │     ├── dashboard.html
-│     ├── add_work.html
-│     ├── edit_work.html
-│     ├── calendar.html
 │     └── ...
 └── README.md
+</details>
+🛠️ Funcionalidades principales
+🧑‍💼 Gestión de usuarios (administrador y trabajador)
 
+📝 Partes de trabajo: alta, edición, borrado (solo admin)
 
-4. Configuración principal
-Flask como framework web.
+⏱️ Control de horas trabajadas
 
+📸 Subida de foto y firma digital (validación segura)
 
-SQLAlchemy como ORM.
+📆 Calendario avanzado (FullCalendar) con filtros por cliente y trabajador
 
+📊 Dashboard de estadísticas y KPIs
 
-WTForms para formularios seguros.
+🔒 Seguridad: contraseñas cifradas, CSRF, control de roles y subida protegida
 
+🔐 Seguridad aplicada
+Contraseñas cifradas (hash scrypt/pbkdf2)
 
-Bootstrap 5 para el diseño responsive.
+CSRF en todos los formularios (Flask-WTF)
 
+Validación y protección de archivos subidos
 
-FullCalendar para la vista de calendario de trabajos.
+Límite de tamaño de subida (MAX_CONTENT_LENGTH)
 
+Control estricto de roles y rutas
 
-Sistema de roles: usuario y administrador.
+SECRET_KEY fuerte (en .env o en la config)
 
+No debug en producción
 
-CSRF protection habilitado en todos los formularios.
+📈 Mejoras sugeridas y roadmap
+ Límite de intentos de login y bloqueo temporal
 
+ Autenticación 2FA para administradores
 
-Secret Key segura para el proyecto (define en app.py).
+ Logs de acceso y cambios
 
+ Exportación a Excel/PDF
 
+ Deploy con HTTPS y dominio propio
 
-5. Funcionalidades principales
-Usuarios
-Alta de trabajadores y administradores (solo admin).
+📧 Contacto
+Desarrollado por [Francisco Alabarce]
+Email: franalabarce@gmail.com
+Proyecto para Multiservicios Desatascos Ortiz S.L.
 
+⚖️ Licencia
+MIT License
 
-Login/logout seguro.
 
 
-Roles: solo admin puede asignar partes o ver estadísticas globales.
+---
 
+### **Extras que puedes añadir fácilmente:**
 
-Partes de trabajo
-Alta, edición y borrado (borrar solo admin).
+- Capturas de pantalla (`/static/images/screenshot1.png` y enlazarlas así):
+  ```markdown
+  ![Dashboard ejemplo](static/images/screenshot1.png)
+GIFs o vídeo corto (subido a YouTube o como archivo)
 
-
-Subida de foto y firma (validación de imágenes).
-
-
-Campo de horas trabajadas.
-
-
-Asignación de parte a cualquier usuario (admin puede asignar a admins o trabajadores).
-
-
-Calendario
-Vista mensual, semanal y diaria (por defecto mensual y compacta).
-
-
-Filtros por cliente y trabajador.
-
-
-Click en día: cambia a vista diaria.
-
-
-Dashboard
-Estadísticas globales (total de partes, trabajadores, trabajos por cliente, horas por trabajador, gráfico mensual).
-
-
-Seguridad
-Contraseñas cifradas (scrypt/pbkdf2).
-
-
-CSRF en todos los formularios.
-
-
-Validación de archivos subidos.
-
-
-Control de roles en rutas.
-
-
-Tamaño máximo de subida configurado.
-
-
-
-6. Seguridad aplicada
-Contraseñas:
-Hash seguro con generate_password_hash, nunca texto plano.
-
-
-CSRF:
-Flask-WTF en todos los formularios, incluido EmptyForm para forms manuales.
-
-
-Roles y permisos:
-Decoradores y validaciones en rutas para que solo admin vea/edite lo que le corresponde.
-
-
-Archivos:
-Validación de imágenes.
-
-
-Ruta de subida protegida.
-
-
-Tamaño máximo (MAX_CONTENT_LENGTH).
-
-
-Sesión y configuración:
-SECRET_KEY fuerte.
-
-
-Desactivado modo debug en producción.
-
-
-
-7. Cosas pendientes / Mejoras sugeridas
-Implementar límite de intentos de login y bloqueo temporal.
-
-
-Autenticación 2FA para administradores.
-
-
-Logs de acceso y acciones.
-
-
-Protección de rutas de subida/descarga de archivos (solo usuarios logueados).
-
-
-Exportación de informes (Excel, PDF).
-
-
-Mejora visual con tu logo/marca.
-
-
-Deploy en servidor seguro con HTTPS.
-
-
-
-8. Créditos y contacto
-Desarrollado por [Tu Nombre / Tu Empresa]
- Contacto: info@desatascosortiz.es
- Proyecto para Multiservicios Desatascos Ortiz S.L.
-
-9. Licencia
-Este proyecto es de código abierto y se distribuye bajo la licencia MIT. 
+Badges de Shields.io personalizados (build, version, code quality, etc.)
