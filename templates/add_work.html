@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Añadir Parte de Trabajo{% endblock %}
+{% block content %}
+<h2 class="mb-4">Nuevo parte de trabajo</h2>
+<form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+        {{ form.fecha.label(class="form-label") }}
+        {{ form.fecha(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.direccion.label(class="form-label") }}
+        {{ form.direccion(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.tipo_trabajo.label(class="form-label") }}
+        {{ form.tipo_trabajo(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.cliente.label(class="form-label") }}
+        {{ form.cliente(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.materiales_usados.label(class="form-label") }}
+        {{ form.materiales_usados(class="form-control", rows="2") }}
+    </div>
+    <div class="mb-3">
+        {{ form.horas.label(class="form-label") }}
+        {{ form.horas(class="form-control") }}
+    </div>
+
+    {# SOLO PARA ADMIN: SELECT DE TRABAJADOR #}
+    {% if current_user.rol == "admin" %}
+    <div class="mb-3">
+        {{ form.trabajador.label(class="form-label") }}
+        {{ form.trabajador(class="form-select") }}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+        {{ form.foto.label(class="form-label") }}
+        {{ form.foto(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.firma.label(class="form-label") }}
+        {{ form.firma(class="form-control") }}
+    </div>
+    <button type="submit" class="btn btn-primary">Guardar parte</button>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancelar</a>
+</form>
+{% for field, errors in form.errors.items() %}
+    <div class="alert alert-danger">
+        {{ form[field].label.text }}: {{ errors|join(', ') }}
+    </div>
+{% endfor %}
+{% endblock %}

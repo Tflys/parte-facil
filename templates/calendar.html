@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<h2 class="mb-4">Calendario de trabajos</h2>
+<div class="row mb-3">
+  <div class="col-md-4">
+    <label for="filtroCliente" class="form-label">Filtrar por cliente</label>
+    <select id="filtroCliente" class="form-select">
+      <option value="">Todos</option>
+      {% for cliente in clientes %}
+        <option value="{{ cliente }}">{{ cliente }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% if current_user.rol == 'admin' %}
+  <div class="col-md-4">
+    <label for="filtroTrabajador" class="form-label">Filtrar por trabajador</label>
+    <select id="filtroTrabajador" class="form-select">
+      <option value="">Todos</option>
+      {% for trabajador in trabajadores %}
+        <option value="{{ trabajador.id }}">{{ trabajador.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+</div>
+<div id="calendar"></div>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Volver al panel</a>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    var filtroCliente = document.getElementById('filtroCliente');
+    var filtroTrabajador = document.getElementById('filtroTrabajador');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth', // Vista mensual por defecto
+        locale: 'es',
+        firstDay: 1, // Lunes como primer día de la semana
+        timeZone: 'Europe/Madrid',
+        height: 'auto',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        dateClick: function(info) {
+            calendar.changeView('timeGridDay', info.dateStr);
+        },
+        events: function(fetchInfo, successCallback, failureCallback) {
+            let url = '/api/trabajos?cliente=' + encodeURIComponent(filtroCliente.value || '');
+            if (filtroTrabajador) {
+                url += '&trabajador=' + encodeURIComponent(filtroTrabajador.value || '');
+            }
+            fetch(url)
+                .then(response => response.json())
+                .then(events => successCallback(events))
+                .catch(error => failureCallback(error));
+        },
+        eventClick: function(info) {
+            var detalle = `<strong>Trabajo:</strong> ${info.event.title}<br>
+                           <strong>Dirección:</strong> ${info.event.extendedProps.direccion}<br>
+                           <strong>Materiales usados:</strong> ${info.event.extendedProps.materiales}<br>`;
+            if(info.event.extendedProps.foto){
+                detalle += `<strong>Foto:</strong> <a href="/static/uploads/${info.event.extendedProps.foto}" target="_blank">Ver foto</a><br>`;
+            }
+            if(info.event.extendedProps.firma){
+                detalle += `<strong>Firma:</strong> <a href="/static/uploads/${info.event.extendedProps.firma}" target="_blank">Ver firma</a>`;
+            }
+
+            document.getElementById('modalDetalleBody').innerHTML = detalle;
+            var myModal = new bootstrap.Modal(document.getElementById('detalleModal'));
+            myModal.show();
+        }
+    });
+    calendar.render();
+
+    filtroCliente.addEventListener('change', function() {
+        calendar.refetchEvents();
+    });
+    if (filtroTrabajador) {
+        filtroTrabajador.addEventListener('change', function() {
+            calendar.refetchEvents();
+        });
+    }
+});
+
+    calendar.render();
+    
+
+    filtroCliente.addEventListener('change', function() {
+        calendar.refetchEvents();
+    });
+    if (filtroTrabajador) {
+        filtroTrabajador.addEventListener('change', function() {
+            calendar.refetchEvents();
+        });
+    }
+</script>
+
+<!-- Modal Bootstrap para los detalles del parte -->
+<div class="modal fade" id="detalleModal" tabindex="-1" aria-labelledby="detalleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleModalLabel">Detalle del trabajo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="modalDetalleBody">
+        <!-- Aquí irán los detalles del trabajo -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

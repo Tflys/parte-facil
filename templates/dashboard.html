@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Panel de Trabajo{% endblock %}
+{% block content %}
+<h2 class="mb-4">Tus trabajos asignados</h2>
+{% if current_user.rol == "admin" %}
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('alta_trabajador') }}" class="btn btn-primary me-2">Alta trabajador</a>
+    <a href="{{ url_for('add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
+    <a href="{{ url_for('calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
+
+</div>
+{% else %}
+<div class="d-flex justify-content-end mb-3">
+    <a href="{{ url_for('add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
+    <a href="{{ url_for('calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
+</div>
+{% endif %}
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Acciones</th>
+            <th>Fecha</th>
+            <th>Dirección</th>
+            <th>Tipo de trabajo</th>
+            <th>Cliente</th>
+            <th>Materiales usados</th>
+            <th>Foto</th>
+            <th>Firma</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        {% for trabajo in trabajos %}
+        <tr>
+            <td>
+                {% if current_user.rol == "admin" or trabajo.id_trabajador == current_user.id %}
+                    <a href="{{ url_for('edit_work', work_id=trabajo.id) }}" class="btn btn-sm btn-warning">Editar</a>
+                {% endif %}
+                {% if current_user.rol == "admin" %}
+                    <form action="{{ url_for('delete_work', work_id=trabajo.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar este parte?');">
+                        {{ form.hidden_tag() }}
+                        <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
+                    </form>
+                {% endif %}
+            </td>
+
+            <td>{{ trabajo.fecha.strftime('%d/%m/%Y') }}</td>
+            <td>{{ trabajo.direccion }}</td>
+            <td>{{ trabajo.tipo_trabajo }}</td>
+            <td>{{ trabajo.cliente }}</td>
+            <td>{{ trabajo.materiales_usados or "-" }}</td>
+            <td>
+                {% if trabajo.foto %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ trabajo.foto) }}" target="_blank">Ver foto</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td>
+                {% if trabajo.firma %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ trabajo.firma) }}" target="_blank">Ver firma</a>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

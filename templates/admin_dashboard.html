@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Estadísticas - Dashboard Admin{% endblock %}
+{% block content %}
+<h2 class="mb-4">Panel de Estadísticas</h2>
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Partes registrados</h5>
+                <p class="display-5">{{ total_trabajos }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Trabajadores</h5>
+                <p class="display-5">{{ total_trabajadores }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+<h4 class="mt-4">Horas totales por trabajador</h4>
+<table class="table table-striped mb-4">
+    <thead>
+        <tr>
+            <th>Trabajador</th>
+            <th>Horas</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for nombre, total_horas in horas_por_trabajador %}
+        <tr>
+            <td>{{ nombre }}</td>
+            <td>{{ '%.2f' | format(total_horas or 0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4 class="mt-4">Trabajos por cliente</h4>
+<table class="table table-striped mb-4">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Partes</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cliente, total in trabajos_por_cliente %}
+        <tr>
+            <td>{{ cliente }}</td>
+            <td>{{ total }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4 class="mt-4">Evolución mensual de partes</h4>
+<canvas id="trabajosMesChart" width="600" height="300"></canvas>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Volver al panel</a>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('trabajosMesChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for mes, _ in trabajos_por_mes %}
+                    "{{ mes }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Partes por mes',
+                data: [
+                    {% for _, total in trabajos_por_mes %}
+                        {{ total }},
+                    {% endfor %}
+                ],
+                fill: false,
+                borderColor: 'blue',
+                tension: 0.2
+            }]
+        }
+    });
+});
+</script>
+{% endblock %}
