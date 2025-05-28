@@ -14,7 +14,7 @@
       {% endfor %}
     </select>
   </div>
-  {% if current_user.rol == 'admin' %}
+  {% if es_admin %}
   <div class="col-md-4">
     <label for="filtroTrabajador" class="form-label">Filtrar por trabajador</label>
     <select id="filtroTrabajador" class="form-select">
@@ -29,18 +29,21 @@
 <div id="calendar"></div>
 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Volver al panel</a>
 {% endblock %}
+
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 <script>
+var esAdmin = {{ 'true' if es_admin else 'false' }};
+
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     var filtroCliente = document.getElementById('filtroCliente');
     var filtroTrabajador = document.getElementById('filtroTrabajador');
 
     var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth', // Vista mensual por defecto
+        initialView: 'dayGridMonth',
         locale: 'es',
-        firstDay: 1, // Lunes como primer día de la semana
+        firstDay: 1,
         timeZone: 'Europe/Madrid',
         height: 'auto',
         headerToolbar: {
@@ -62,14 +65,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 .catch(error => failureCallback(error));
         },
         eventClick: function(info) {
-            var detalle = `<strong>Trabajo:</strong> ${info.event.title}<br>
-                           <strong>Dirección:</strong> ${info.event.extendedProps.direccion}<br>
-                           <strong>Materiales usados:</strong> ${info.event.extendedProps.materiales}<br>`;
+            let detalle = `<strong>Trabajo:</strong> ${info.event.title}<br>
+                           <strong>Dirección:</strong> ${info.event.extendedProps.direccion || '-'}<br>
+                           <strong>Materiales usados:</strong> ${info.event.extendedProps.materiales || '-'}<br>
+                           <strong>Horas:</strong> ${info.event.extendedProps.horas || '-'}<br>`;
+            if(esAdmin){
+                detalle += `<strong>Estado:</strong> ${info.event.extendedProps.estado || '-'}<br>`;
+                detalle += `<strong>Observaciones:</strong> <span style="white-space:pre-line;">${info.event.extendedProps.observaciones || '-'}</span><br>`;
+                if(info.event.extendedProps.trabajador){
+                    detalle += `<strong>Trabajador:</strong> ${info.event.extendedProps.trabajador}<br>`;
+                }
+            }
             if(info.event.extendedProps.foto){
                 detalle += `<strong>Foto:</strong> <a href="/static/uploads/${info.event.extendedProps.foto}" target="_blank">Ver foto</a><br>`;
             }
             if(info.event.extendedProps.firma){
-                detalle += `<strong>Firma:</strong> <a href="/static/uploads/${info.event.extendedProps.firma}" target="_blank">Ver firma</a>`;
+                detalle += `<strong>Firma:</strong> <a href="/static/uploads/${info.event.extendedProps.firma}" target="_blank">Ver firma</a><br>`;
             }
 
             document.getElementById('modalDetalleBody').innerHTML = detalle;
@@ -88,18 +99,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-    calendar.render();
-    
-
-    filtroCliente.addEventListener('change', function() {
-        calendar.refetchEvents();
-    });
-    if (filtroTrabajador) {
-        filtroTrabajador.addEventListener('change', function() {
-            calendar.refetchEvents();
-        });
-    }
 </script>
 
 <!-- Modal Bootstrap para los detalles del parte -->

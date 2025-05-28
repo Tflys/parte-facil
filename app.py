@@ -146,7 +146,13 @@ def calendar():
     trabajadores = []
     if current_user.rol == "admin":
         trabajadores = Usuario.query.filter_by(rol="trabajador").all()
-    return render_template('calendar.html', clientes=clientes, trabajadores=trabajadores)
+    return render_template(
+        'calendar.html',
+        clientes=clientes,
+        trabajadores=trabajadores,
+        es_admin=(current_user.rol == "admin")   # <-- Añadido
+    )
+
 
 
 
@@ -172,14 +178,16 @@ def api_trabajos():
     for t in trabajos:
         eventos.append({
             "id": t.id,
-            "title": f"{t.tipo_trabajo} ({t.cliente})",
-            "start": t.fecha.strftime('%Y-%m-%d'),
-            "extendedProps": {
-                "direccion": t.direccion,
-                "materiales": t.materiales_usados or "",
-                "foto": t.foto,
-                "firma": t.firma,
-            }
+            "title": t.tipo_trabajo,  # o el campo principal
+            "start": t.fecha.isoformat(),
+            "direccion": t.direccion,
+            "materiales": t.materiales_usados,
+            "horas": t.horas,
+            "foto": t.foto,
+            "firma": t.firma,
+            "observaciones": t.observaciones,
+            "estado": t.estado,
+            "trabajador": t.trabajador.nombre if t.trabajador else None,
         })
     return jsonify(eventos)
 

@@ -16,60 +16,92 @@
 </div>
 {% endif %}
 
-<table class="table table-bordered table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Acciones</th>
-            <th>Fecha</th>
-            <th>Dirección</th>
-            <th>Tipo de trabajo</th>
-            <th>Cliente</th>
-            <th>Materiales usados</th>
-            <th>Foto</th>
-            <th>Firma</th>
-            
-        </tr>
-    </thead>
-    <tbody>
-        {% for trabajo in trabajos %}
-        <tr>
-            <td>
-                {% if current_user.rol == "admin" or trabajo.id_trabajador == current_user.id %}
-                    <a href="{{ url_for('edit_work', work_id=trabajo.id) }}" class="btn btn-sm btn-warning">Editar</a>
-                {% endif %}
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Acciones</th>
+                <th>Fecha</th>
+                <th>Dirección</th>
+                <th>Tipo de trabajo</th>
+                <th>Cliente</th>
+                <th>Materiales usados</th>
+                <th>Horas</th>
+                <th>Observaciones</th>
+                <th>Foto</th>
+                <th>Firma</th>
                 {% if current_user.rol == "admin" %}
-                    <form action="{{ url_for('delete_work', work_id=trabajo.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar este parte?');">
-                        {{ form.hidden_tag() }}
-                        <button type="submit" class="btn btn-sm btn-danger">Borrar</button>
-                    </form>
+                    <th>Estado</th>
+                    <th>Trabajador</th>
                 {% endif %}
-            </td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trabajo in trabajos %}
+            <tr>
+                <td>
+                    {% if current_user.rol == "admin" or trabajo.id_trabajador == current_user.id %}
+                        <a href="{{ url_for('edit_work', work_id=trabajo.id) }}" class="btn btn-sm btn-warning mb-1">Editar</a>
+                    {% endif %}
+                    {% if current_user.rol == "admin" %}
+                        <form action="{{ url_for('delete_work', work_id=trabajo.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar este parte?');">
+                            {{ form.hidden_tag() }}
+                            <button type="submit" class="btn btn-sm btn-danger mb-1">Borrar</button>
+                        </form>
+                    {% endif %}
+                </td>
+                <td>{{ trabajo.fecha.strftime('%d/%m/%Y') }}</td>
+                <td>{{ trabajo.direccion }}</td>
+                <td>{{ trabajo.tipo_trabajo }}</td>
+                <td>{{ trabajo.cliente }}</td>
+                <td>{{ trabajo.materiales_usados or "-" }}</td>
+                <td>{{ trabajo.horas or "-" }}</td>
+                <td>
+                    {% if trabajo.observaciones %}
+                        <span style="white-space: pre-line;">{{ trabajo.observaciones }}</span>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if trabajo.foto %}
+                        <a href="{{ url_for('static', filename='uploads/' ~ trabajo.foto) }}" target="_blank">Ver foto</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if trabajo.firma %}
+                        <a href="{{ url_for('static', filename='uploads/' ~ trabajo.firma) }}" target="_blank">Ver firma</a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                {% if current_user.rol == "admin" %}
+                    <td>
+                        {% if trabajo.estado == "pagado" %}
+                            <span class="badge bg-success">Pagado</span>
+                        {% elif trabajo.estado == "pendiente_cobro" %}
+                            <span class="badge bg-warning text-dark">Pendiente cobro</span>
+                        {% elif trabajo.estado == "pendiente_facturar" %}
+                            <span class="badge bg-info text-dark">Pendiente facturar</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Sin terminar</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if trabajo.trabajador %}
+                            {{ trabajo.trabajador.nombre }}
+                        {% else %}
+                            {{ trabajo.id_trabajador }}
+                        {% endif %}
+                    </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
-            <td>{{ trabajo.fecha.strftime('%d/%m/%Y') }}</td>
-            <td>{{ trabajo.direccion }}</td>
-            <td>{{ trabajo.tipo_trabajo }}</td>
-            <td>{{ trabajo.cliente }}</td>
-            <td>{{ trabajo.materiales_usados or "-" }}</td>
-            <td>
-                {% if trabajo.foto %}
-                    <a href="{{ url_for('static', filename='uploads/' ~ trabajo.foto) }}" target="_blank">Ver foto</a>
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            <td>
-                {% if trabajo.firma %}
-                    <a href="{{ url_for('static', filename='uploads/' ~ trabajo.firma) }}" target="_blank">Ver firma</a>
-                {% else %}
-                    -
-                {% endif %}
-            </td>
-            {% if current_user.rol == "admin" %}
-                <td>{{ trabajo.estado }}</td>
-            {% endif %}
 
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
 {% endblock %}
