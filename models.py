@@ -22,4 +22,6 @@ class Trabajo(db.Model):
     firma = db.Column(db.String(120), nullable=True)  # Ruta del archivo
     foto = db.Column(db.String(120), nullable=True)   # Ruta del archivo
     terminado = db.Column(db.Boolean, default=False)
+    estado = db.Column(db.String(30), default='sin terminar')
+    observaciones = db.Column(db.Text)
     id_trabajador = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)

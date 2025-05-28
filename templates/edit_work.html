@@ -4,36 +4,45 @@
 <h2 class="mb-4">Editar parte de trabajo</h2>
 <form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
+    {# Campo para la fecha del trabajo #}
     <div class="mb-3">
         {{ form.fecha.label(class="form-label") }}
         {{ form.fecha(class="form-control") }}
     </div>
+    {# Campo para la dirección del trabajo #}
     <div class="mb-3">
         {{ form.direccion.label(class="form-label") }}
         {{ form.direccion(class="form-control") }}
     </div>
+    {# Campo para el tipo de trabajo realizado #}
     <div class="mb-3">
         {{ form.tipo_trabajo.label(class="form-label") }}
         {{ form.tipo_trabajo(class="form-control") }}
     </div>
+    {# Campo para seleccionar el cliente #}
     <div class="mb-3">
         {{ form.cliente.label(class="form-label") }}
         {{ form.cliente(class="form-control") }}
     </div>
+    {# Campo para los materiales usados #}
     <div class="mb-3">
         {{ form.materiales_usados.label(class="form-label") }}
         {{ form.materiales_usados(class="form-control", rows="2") }}
     </div>
+    {# Campo para las horas trabajadas #}
     <div class="mb-3">
         {{ form.horas.label(class="form-label") }}
         {{ form.horas(class="form-control") }}
     </div>
     {% if current_user.rol == "admin" %}
+    {# Campo para seleccionar el trabajador (solo admin) #}
     <div class="mb-3">
         {{ form.trabajador.label(class="form-label") }}
         {{ form.trabajador(class="form-select") }}
     </div>
     {% endif %}
+    {# comment #} foto actual {# endcomment #}
+    {# Campo para subir o ver la foto actual #}
     <div class="mb-3">
         {{ form.foto.label(class="form-label") }}
         {{ form.foto(class="form-control") }}
@@ -41,6 +50,8 @@
             <p>Foto actual: <a href="{{ url_for('static', filename='uploads/' ~ trabajo.foto) }}" target="_blank">Ver foto</a></p>
         {% endif %}
     </div>
+    {# comment #} Firma actual {# endcomment #}
+    {# Campo para subir o ver la firma actual #}
     <div class="mb-3">
         {{ form.firma.label(class="form-label") }}
         {{ form.firma(class="form-control") }}
@@ -48,6 +59,25 @@
             <p>Firma actual: <a href="{{ url_for('static', filename='uploads/' ~ trabajo.firma) }}" target="_blank">Ver firma</a></p>
         {% endif %}
     </div>
+    {# Aquí va el campo de observaciones #}
+    <div>
+        {{ form.observaciones.label }}<br>
+        {{ form.observaciones(rows=4, cols=60) }}
+    </div>
+
+    {# Campo para marcar si el trabajo está terminado #}
+    <div class="mb-3">
+        {{ form.terminado.label }} {{ form.terminado() }}
+    </div>
+
+    {% if es_admin %}
+        <div class="form-group">
+            {{ form.estado.label }}
+            {{ form.estado() }}
+        </div>
+    {% endif %}
+    <br>
+
     <button type="submit" class="btn btn-primary">Guardar cambios</button>
     <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancelar</a>
 </form>

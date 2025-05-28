@@ -55,6 +55,8 @@ def logout():
 @login_required
 def add_work():
     form = WorkForm()
+    if not form.estado.data:
+        form.estado.data = 'sin_terminar'
     if current_user.rol == "admin":
         usuarios = Usuario.query.filter(Usuario.id != current_user.id).all()
         form.trabajador.choices = [(u.id, f"{u.nombre} ({u.rol})") for u in usuarios]
@@ -96,14 +98,14 @@ def add_work():
             horas=form.horas.data,
             foto=foto_filename,
             firma=firma_filename,
-            id_trabajador=id_trabajador
+            id_trabajador=id_trabajador,
+            estado=form.estado.data  # <-- ¡Ahora sí se guarda el estado!
         )
         db.session.add(trabajo)
         db.session.commit()
         flash("Parte de trabajo guardado correctamente")
         return redirect(url_for("dashboard"))
     return render_template("add_work.html", form=form)
-
 
 
 @app.route('/alta_trabajador', methods=['GET', 'POST'])
@@ -207,15 +209,16 @@ def edit_work(work_id):
         trabajo.materiales_usados = form.materiales_usados.data
         trabajo.horas = form.horas.data
 
-        # Actualización de trabajador (solo admin)
+        # Actualización de trabajador y ESTADO (solo admin)
         if current_user.rol == "admin":
             trabajo.id_trabajador = form.trabajador.data
+            trabajo.estado = form.estado.data  # <-- ACTUALIZA EL CAMPO ESTADO
 
         # Validar y guardar imagen nueva si se sube
         if form.foto.data:
             if not allowed_image(form.foto.data.filename, form.foto.data.stream):
                 flash("Archivo de imagen no permitido o inválido (foto).")
-                return render_template("edit_work.html", form=form, trabajo=trabajo)
+                return render_template("edit_work.html", form=form, trabajo=trabajo, es_admin=(current_user.rol == "admin"))
             foto_filename = secure_filename(form.foto.data.filename)
             form.foto.data.save(os.path.join(app.config['UPLOAD_FOLDER'], foto_filename))
             trabajo.foto = foto_filename
@@ -224,7 +227,7 @@ def edit_work(work_id):
         if form.firma.data:
             if not allowed_image(form.firma.data.filename, form.firma.data.stream):
                 flash("Archivo de imagen no permitido o inválido (firma).")
-                return render_template("edit_work.html", form=form, trabajo=trabajo)
+                return render_template("edit_work.html", form=form, trabajo=trabajo, es_admin=(current_user.rol == "admin"))
             firma_filename = secure_filename(form.firma.data.filename)
             form.firma.data.save(os.path.join(app.config['UPLOAD_FOLDER'], firma_filename))
             trabajo.firma = firma_filename
@@ -233,7 +236,8 @@ def edit_work(work_id):
         flash("Parte de trabajo actualizado correctamente.")
         return redirect(url_for("dashboard"))
 
-    return render_template("edit_work.html", form=form, trabajo=trabajo)
+    return render_template("edit_work.html", form=form, trabajo=trabajo, es_admin=(current_user.rol == "admin"))
+
 
 
 @app.route('/delete_work/<int:work_id>', methods=['POST'])

@@ -64,6 +64,10 @@
                     -
                 {% endif %}
             </td>
+            {% if current_user.rol == "admin" %}
+                <td>{{ trabajo.estado }}</td>
+            {% endif %}
+
         </tr>
         {% endfor %}
     </tbody>

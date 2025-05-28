@@ -3,7 +3,7 @@ from wtforms.validators import DataRequired, Email
 from wtforms.validators import EqualTo
 from wtforms import SelectField
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField
+from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField, BooleanField
 from wtforms.validators import DataRequired, Email, NumberRange
 
 class EmptyForm(FlaskForm):
@@ -26,8 +26,16 @@ class WorkForm(FlaskForm):
     horas = FloatField('Horas trabajadas', validators=[DataRequired(), NumberRange(min=0, max=24)])
     foto = FileField('Foto')
     firma = FileField('Firma')
-    trabajador = SelectField('Trabajador', coerce=int)  # NUEVO CAMPO
+    trabajador = SelectField('Trabajador', coerce=int)
+    terminado = BooleanField('Terminado')
     submit = SubmitField('Guardar parte')
+    observaciones = TextAreaField('Observaciones')
+    estado = SelectField('Estado', choices=[
+        ('pagado', 'Pagado'),
+        ('pendiente_cobro', 'Pendiente cobro'),
+        ('pendiente_facturar', 'Pendiente facturar'),
+        ('sin_terminar', 'Sin terminar')
+    ], default='Sin terminar')
 
 
 
