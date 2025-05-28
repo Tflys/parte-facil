@@ -150,7 +150,7 @@ def calendar():
         'calendar.html',
         clientes=clientes,
         trabajadores=trabajadores,
-        es_admin=(current_user.rol == "admin")   # <-- Añadido
+        es_admin=(current_user.rol == "admin")   
     )
 
 
