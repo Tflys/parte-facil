@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Archivo demasiado grande{% endblock %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="display-4 text-danger">😮 Archivo demasiado grande</h1>
+    <p class="lead mt-3">
+        El archivo que intentaste subir supera el límite permitido (2 MB).<br>
+        Por favor, selecciona un archivo más pequeño.
+    </p>
+    <a href="{{ request.referrer or url_for('dashboard') }}" class="btn btn-primary mt-4">
+        Volver atrás
+    </a>
+</div>
+{% endblock %}

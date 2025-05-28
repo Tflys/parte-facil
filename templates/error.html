@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ error_title or "Error" }}{% endblock %}
+{% block content %}
+<div class="container text-center mt-5">
+    <h1 class="display-4 {{ error_color or 'text-danger' }}">
+        {{ error_icon|safe if error_icon else "⚠️" }} {{ error_title or "Error inesperado" }}
+    </h1>
+    <p class="lead mt-3">
+        {{ error_message or "Se ha producido un error. Intenta de nuevo o contacta con el administrador." }}
+    </p>
+    <a href="{{ request.referrer or url_for('dashboard') }}" class="btn btn-primary mt-4">
+        Volver atrás
+    </a>
+</div>
+{% endblock %}

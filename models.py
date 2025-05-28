@@ -21,4 +21,5 @@ class Trabajo(db.Model):
     materiales_usados = db.Column(db.Text, nullable=True)
     firma = db.Column(db.String(120), nullable=True)  # Ruta del archivo
     foto = db.Column(db.String(120), nullable=True)   # Ruta del archivo
+    terminado = db.Column(db.Boolean, default=False)
     id_trabajador = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)

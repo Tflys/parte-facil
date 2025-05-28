@@ -8,10 +8,14 @@ from datetime import datetime
 from models import db, Usuario, Trabajo
 from forms import LoginForm, WorkForm, UserForm
 from flask import jsonify
+
+from utils import allowed_image
+from config import Config
+from errors import register_error_handlers
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'supersecreto'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///multiservicios.db'
-app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+register_error_handlers(app)
+app.config.from_object(Config)
 db.init_app(app)
 
 login_manager = LoginManager(app)
@@ -20,6 +24,7 @@ login_manager.login_view = 'login'
 @login_manager.user_loader
 def load_user(user_id):
     return Usuario.query.get(int(user_id))
+
 
 
 @app.route('/')
@@ -60,10 +65,20 @@ def add_work():
     if form.validate_on_submit():
         foto_filename = None
         firma_filename = None
+
+        # Validar foto si se sube
         if form.foto.data:
+            if not allowed_image(form.foto.data.filename, form.foto.data.stream):
+                flash("Archivo de imagen no permitido o inválido (foto).")
+                return render_template("add_work.html", form=form)
             foto_filename = secure_filename(form.foto.data.filename)
             form.foto.data.save(os.path.join(app.config['UPLOAD_FOLDER'], foto_filename))
+
+        # Validar firma si se sube
         if form.firma.data:
+            if not allowed_image(form.firma.data.filename, form.firma.data.stream):
+                flash("Archivo de imagen no permitido o inválido (firma).")
+                return render_template("add_work.html", form=form)
             firma_filename = secure_filename(form.firma.data.filename)
             form.firma.data.save(os.path.join(app.config['UPLOAD_FOLDER'], firma_filename))
 
@@ -88,7 +103,6 @@ def add_work():
         flash("Parte de trabajo guardado correctamente")
         return redirect(url_for("dashboard"))
     return render_template("add_work.html", form=form)
-
 
 
 
@@ -169,29 +183,23 @@ def api_trabajos():
 
 
 
-@app.route('/edit_work/<int:work_id>', methods=['GET', 'POST'])
+@app.route("/edit_work/<int:work_id>", methods=["GET", "POST"])
 @login_required
 def edit_work(work_id):
     trabajo = Trabajo.query.get_or_404(work_id)
-
+    form = WorkForm(obj=trabajo)
+    
+    # Solo admin puede editar cualquier parte. Trabajador solo el suyo:
     if current_user.rol != "admin" and trabajo.id_trabajador != current_user.id:
         flash("No tienes permisos para editar este parte.")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for("dashboard"))
 
-    form = WorkForm(obj=trabajo)
-
-    # SIEMPRE asigna los choices antes del validate_on_submit
     if current_user.rol == "admin":
-        trabajadores = Usuario.query.filter_by(rol="trabajador").all()
-        form.trabajador.choices = [(t.id, t.nombre) for t in trabajadores]
-        # Solo asigna el .data si es GET (al cargar la página), no en POST
-        if request.method == "GET":
-            form.trabajador.data = trabajo.id_trabajador
-    else:
-        if hasattr(form, 'trabajador'):
-            del form.trabajador
+        usuarios = Usuario.query.filter(Usuario.id != current_user.id).all()
+        form.trabajador.choices = [(u.id, f"{u.nombre} ({u.rol})") for u in usuarios]
 
     if form.validate_on_submit():
+        # Actualización de campos normales
         trabajo.fecha = form.fecha.data
         trabajo.direccion = form.direccion.data
         trabajo.tipo_trabajo = form.tipo_trabajo.data
@@ -199,24 +207,34 @@ def edit_work(work_id):
         trabajo.materiales_usados = form.materiales_usados.data
         trabajo.horas = form.horas.data
 
+        # Actualización de trabajador (solo admin)
         if current_user.rol == "admin":
             trabajo.id_trabajador = form.trabajador.data
 
+        # Validar y guardar imagen nueva si se sube
         if form.foto.data:
+            if not allowed_image(form.foto.data.filename, form.foto.data.stream):
+                flash("Archivo de imagen no permitido o inválido (foto).")
+                return render_template("edit_work.html", form=form, trabajo=trabajo)
             foto_filename = secure_filename(form.foto.data.filename)
             form.foto.data.save(os.path.join(app.config['UPLOAD_FOLDER'], foto_filename))
             trabajo.foto = foto_filename
+
+        # Validar y guardar firma nueva si se sube
         if form.firma.data:
+            if not allowed_image(form.firma.data.filename, form.firma.data.stream):
+                flash("Archivo de imagen no permitido o inválido (firma).")
+                return render_template("edit_work.html", form=form, trabajo=trabajo)
             firma_filename = secure_filename(form.firma.data.filename)
             form.firma.data.save(os.path.join(app.config['UPLOAD_FOLDER'], firma_filename))
             trabajo.firma = firma_filename
 
         db.session.commit()
-        flash("Parte editado correctamente.")
-        return redirect(url_for('dashboard'))
+        flash("Parte de trabajo actualizado correctamente.")
+        return redirect(url_for("dashboard"))
 
-    print(form.errors)
-    return render_template('edit_work.html', form=form, trabajo=trabajo)
+    return render_template("edit_work.html", form=form, trabajo=trabajo)
+
 
 @app.route('/delete_work/<int:work_id>', methods=['POST'])
 @login_required
@@ -278,6 +296,11 @@ from datetime import datetime
 def inject_now():
     return {'now': datetime.now()}
 
+from werkzeug.exceptions import RequestEntityTooLarge
+
+@app.errorhandler(413)
+def too_large(e):
+    return render_template("413.html"), 413
 
 if __name__ == '__main__':
     if __name__ == '__main__':
