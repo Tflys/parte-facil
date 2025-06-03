@@ -39,7 +39,7 @@ La app es responsive y segura, con sistema de roles: **Administrador** y **Traba
 ## 🏁 Instalación rápida
 
 
-git clone https://github.com/TuUsuario/multiservicios-ortiz.git
+git clone https://github.com/Tflys/multiservicios-ortiz.git
 cd multiservicios-ortiz
 python -m venv venv
 # Windows:

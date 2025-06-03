@@ -1,10 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email, NumberRange, EqualTo
 from wtforms.validators import EqualTo
 from wtforms import SelectField
 from flask_wtf import FlaskForm
-from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField, BooleanField
-from wtforms.validators import DataRequired, Email, NumberRange
+from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField, BooleanField, DateTimeField
+from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField, BooleanField, DateTimeField
+
+
 
 class EmptyForm(FlaskForm):
     pass
@@ -17,7 +19,8 @@ class LoginForm(FlaskForm):
 
 
 class WorkForm(FlaskForm):
-    fecha = DateField('Fecha', validators=[DataRequired()])
+    fecha = DateTimeField('Fecha y hora', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
+    fecha_fin = DateTimeField('Fecha y hora de fin', format='%Y-%m-%dT%H:%M', validators=[DataRequired()])
     direccion = StringField('Dirección', validators=[DataRequired()])
     tipo_trabajo = StringField('Tipo de trabajo', validators=[DataRequired()])
     cliente = StringField('Cliente', validators=[DataRequired()])

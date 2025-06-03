@@ -8,7 +8,7 @@ from datetime import datetime
 from models import db, Usuario, Trabajo
 from forms import LoginForm, WorkForm, UserForm
 from flask import jsonify
-
+from flask_migrate import Migrate
 from utils import allowed_image
 from config import Config
 from errors import register_error_handlers
@@ -17,6 +17,8 @@ app = Flask(__name__)
 register_error_handlers(app)
 app.config.from_object(Config)
 db.init_app(app)
+# migraciones
+migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -27,9 +29,10 @@ def load_user(user_id):
 
 
 
-@app.route('/')
-def index():
-    return render_template('base.html')
+# @app.route('/')
+# def index():
+#     return render_template('base.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -63,6 +66,8 @@ def add_work():
     else:
         if hasattr(form, 'trabajador'):
             del form.trabajador
+        if hasattr(form, 'estado'):
+            del form.estado  # 🔑 Esto soluciona el error de valid choice
 
     if form.validate_on_submit():
         foto_filename = None
@@ -72,7 +77,7 @@ def add_work():
         if form.foto.data:
             if not allowed_image(form.foto.data.filename, form.foto.data.stream):
                 flash("Archivo de imagen no permitido o inválido (foto).")
-                return render_template("add_work.html", form=form)
+                return render_template("add_work.html", form=form, es_admin=(current_user.rol == "admin"))
             foto_filename = secure_filename(form.foto.data.filename)
             form.foto.data.save(os.path.join(app.config['UPLOAD_FOLDER'], foto_filename))
 
@@ -80,17 +85,20 @@ def add_work():
         if form.firma.data:
             if not allowed_image(form.firma.data.filename, form.firma.data.stream):
                 flash("Archivo de imagen no permitido o inválido (firma).")
-                return render_template("add_work.html", form=form)
+                return render_template("add_work.html", form=form, es_admin=(current_user.rol == "admin"))
             firma_filename = secure_filename(form.firma.data.filename)
             form.firma.data.save(os.path.join(app.config['UPLOAD_FOLDER'], firma_filename))
 
         if current_user.rol == "admin":
             id_trabajador = form.trabajador.data
+            estado = form.estado.data
         else:
             id_trabajador = current_user.id
+            estado = 'sin_terminar'  # Valor fijo para trabajadores
 
         trabajo = Trabajo(
             fecha=form.fecha.data,
+            fecha_fin=form.fecha_fin.data,
             direccion=form.direccion.data,
             tipo_trabajo=form.tipo_trabajo.data,
             cliente=form.cliente.data,
@@ -99,13 +107,15 @@ def add_work():
             foto=foto_filename,
             firma=firma_filename,
             id_trabajador=id_trabajador,
-            estado=form.estado.data  # <-- ¡Ahora sí se guarda el estado!
+            estado=estado,
+            terminado=form.terminado.data,
+            observaciones=form.observaciones.data
         )
         db.session.add(trabajo)
         db.session.commit()
         flash("Parte de trabajo guardado correctamente")
         return redirect(url_for("dashboard"))
-    return render_template("add_work.html", form=form)
+    return render_template("add_work.html", form=form, es_admin=(current_user.rol == "admin"))
 
 
 @app.route('/alta_trabajador', methods=['GET', 'POST'])
@@ -179,7 +189,9 @@ def api_trabajos():
         eventos.append({
             "id": t.id,
             "title": t.tipo_trabajo,  # o el campo principal
-            "start": t.fecha.isoformat(),
+            "start": t.fecha.isoformat(),  # Incluye fecha y hora en ISO, FullCalendar
+            "end": t.fecha_fin.isoformat() if t.fecha_fin else None,
+
             "direccion": t.direccion,
             "materiales": t.materiales_usados,
             "horas": t.horas,
@@ -198,7 +210,7 @@ def api_trabajos():
 def edit_work(work_id):
     trabajo = Trabajo.query.get_or_404(work_id)
     form = WorkForm(obj=trabajo)
-    
+
     # Solo admin puede editar cualquier parte. Trabajador solo el suyo:
     if current_user.rol != "admin" and trabajo.id_trabajador != current_user.id:
         flash("No tienes permisos para editar este parte.")
@@ -207,20 +219,28 @@ def edit_work(work_id):
     if current_user.rol == "admin":
         usuarios = Usuario.query.filter(Usuario.id != current_user.id).all()
         form.trabajador.choices = [(u.id, f"{u.nombre} ({u.rol})") for u in usuarios]
+    else:
+        if hasattr(form, 'trabajador'):
+            del form.trabajador
+        if hasattr(form, 'estado'):
+            del form.estado  # ⚠️ Esto es fundamental
 
     if form.validate_on_submit():
         # Actualización de campos normales
         trabajo.fecha = form.fecha.data
+        trabajo.fecha_fin = form.fecha_fin.data
         trabajo.direccion = form.direccion.data
         trabajo.tipo_trabajo = form.tipo_trabajo.data
         trabajo.cliente = form.cliente.data
         trabajo.materiales_usados = form.materiales_usados.data
         trabajo.horas = form.horas.data
+        trabajo.terminado = form.terminado.data
+        trabajo.observaciones = form.observaciones.data
 
         # Actualización de trabajador y ESTADO (solo admin)
         if current_user.rol == "admin":
             trabajo.id_trabajador = form.trabajador.data
-            trabajo.estado = form.estado.data  # <-- ACTUALIZA EL CAMPO ESTADO
+            trabajo.estado = form.estado.data
 
         # Validar y guardar imagen nueva si se sube
         if form.foto.data:
@@ -301,6 +321,10 @@ def admin_dashboard():
         trabajos_por_mes=trabajos_por_mes
         
     )
+
+@app.route('/')
+def empresa():
+    return render_template('empresa.html')
 
 from datetime import datetime
 

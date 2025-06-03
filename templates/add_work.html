@@ -4,78 +4,81 @@
 <h2 class="mb-4">Nuevo parte de trabajo</h2>
 <form method="POST" enctype="multipart/form-data">
     {{ form.hidden_tag() }}
-    {# Campo para la fecha del trabajo #}
+    {# Fecha/hora inicio #}
     <div class="mb-3">
-        {{ form.fecha.label(class="form-label") }}
-        {{ form.fecha(class="form-control") }}
+        {{ form.fecha.label }} {{ form.fecha(type="datetime-local", class="form-control") }}
     </div>
-    {# Campo para la dirección del trabajo #}
+    {# Fecha/hora fin #}
+    <div class="mb-3">
+        {{ form.fecha_fin.label }} {{ form.fecha_fin(type="datetime-local", class="form-control") }}
+    </div>
+    {# Dirección #}
     <div class="mb-3">
         {{ form.direccion.label(class="form-label") }}
         {{ form.direccion(class="form-control") }}
     </div>
-    {# Campo para el tipo de trabajo realizado #}
+    {# Tipo de trabajo #}
     <div class="mb-3">
         {{ form.tipo_trabajo.label(class="form-label") }}
         {{ form.tipo_trabajo(class="form-control") }}
     </div>
-    {# Campo para seleccionar el cliente #}
+    {# Cliente #}
     <div class="mb-3">
         {{ form.cliente.label(class="form-label") }}
         {{ form.cliente(class="form-control") }}
     </div>
-    {# Campo para los materiales usados #}
+    {# Materiales usados #}
     <div class="mb-3">
         {{ form.materiales_usados.label(class="form-label") }}
         {{ form.materiales_usados(class="form-control", rows="2") }}
     </div>
-    {# Campo para las horas trabajadas #}
+    {# Horas trabajadas #}
     <div class="mb-3">
         {{ form.horas.label(class="form-label") }}
         {{ form.horas(class="form-control") }}
     </div>
-
-    {# Campo para seleccionar el trabajador (solo admin) #}
-    {% if current_user.rol == "admin" %}
+    {# Selección trabajador solo para admin #}
+    {% if es_admin %}
     <div class="mb-3">
         {{ form.trabajador.label(class="form-label") }}
         {{ form.trabajador(class="form-select") }}
     </div>
     {% endif %}
-
-    {# Campo para subir la foto #}
+    {# Foto #}
     <div class="mb-3">
         {{ form.foto.label(class="form-label") }}
         {{ form.foto(class="form-control") }}
     </div>
-    {# Campo para subir la firma #}
+    {# Firma #}
     <div class="mb-3">
         {{ form.firma.label(class="form-label") }}
         {{ form.firma(class="form-control") }}
     </div>
-    {# Campo para marcar si el trabajo está terminado #}
+    {# Terminado #}
     <div class="mb-3">
         {{ form.terminado.label }} {{ form.terminado() }}
     </div>
-    {# Campo para añadir notas adicionales #}
+    {# Observaciones #}
     <div>
         {{ form.observaciones.label }}<br>
         {{ form.observaciones(rows=4, cols=60) }}
     </div>
-
+    {# Estado solo para admin #}
     {% if es_admin %}
-        <div class="form-group">
-            {{ form.estado.label }}
-            {{ form.estado() }}
-        </div>
+    <div class="form-group mt-3">
+        {{ form.estado.label(class="form-label") }}
+        {{ form.estado(class="form-select") }}
+    </div>
     {% endif %}
 
     <br>
     <button type="submit" class="btn btn-primary">Guardar parte</button>
     <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancelar</a>
 </form>
+
+{# Mostrar errores #}
 {% for field, errors in form.errors.items() %}
-    <div class="alert alert-danger">
+    <div class="alert alert-danger mt-2">
         {{ form[field].label.text }}: {{ errors|join(', ') }}
     </div>
 {% endfor %}

@@ -13,7 +13,8 @@ class Usuario(UserMixin, db.Model):
 
 class Trabajo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Date, nullable=False)
+    fecha = db.Column(db.DateTime, nullable=False)
+    fecha_fin = db.Column(db.DateTime, nullable=True)
     direccion = db.Column(db.String(150), nullable=False)
     tipo_trabajo = db.Column(db.String(80), nullable=False)
     cliente = db.Column(db.String(80), nullable=False)

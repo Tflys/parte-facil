@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', function() {
         firstDay: 1,
         timeZone: 'Europe/Madrid',
         height: 'auto',
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false // o true si prefieres 12h
+        },
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',

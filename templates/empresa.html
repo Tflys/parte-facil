@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiservicios Ortiz</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+  <style>
+    .hero {
+        background: linear-gradient(120deg, #d4f7dc 60%, #00ba56 100%);
+        animation: gradientBG 6s ease infinite alternate;
+        min-height: 340px;
+    }
+    @keyframes gradientBG {
+        0% { background-position: 0% 50% }
+        100% { background-position: 100% 50% }
+    }
+    .scale-up { animation: scaleUp 0.7s cubic-bezier(.39,.58,.57,1) both; }
+    @keyframes scaleUp {
+        0% {transform: scale(.8);}
+        100% {transform: scale(1);}
+    }
+    .shadow-pop {
+        animation: shadowPop 1s cubic-bezier(.39,.58,.57,1) both;
+    }
+    @keyframes shadowPop {
+        0% {box-shadow: none;}
+        100% {box-shadow: 0 6px 24px 0 rgba(0,0,0,.15);}
+    }
+    .grayscale-hover { filter: grayscale(1); transition: filter .2s; }
+    .grayscale-hover:hover { filter: grayscale(0); }
+    /* Botón WhatsApp flotante */
+    .whatsapp-float {
+      position: fixed; bottom: 24px; right: 24px; z-index: 1050;
+      background: #25D366; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center; font-size: 2rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
+    }
+    /* Botón llamada fijo en móvil */
+    @media (max-width: 768px) {
+      .call-float {
+        position: fixed; bottom: 96px; right: 24px; z-index: 1050;
+        background: #00ba56; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+        display: flex; align-items: center; justify-content: center; font-size: 2rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #fff;">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('empresa') }}">
+      <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo" height="36" style="vertical-align: middle;">
+      <span class="fw-bold text-success">Multiservicios Desatascos Ortiz S.L.</span>
+    </a>
+    <div>
+      <a href="{{ url_for('login') }}" class="btn btn-success">Acceso empleados</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero py-5 text-dark mb-4">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-7 scale-up" data-aos="fade-right">
+        <h1 class="display-4 fw-bold mb-3 text-success-emphasis">Multiservicios Desatascos Ortiz S.L.</h1>
+        <p class="lead">Soluciones integrales en desatascos, fontanería y mantenimiento para <b>hogares, comunidades y empresas</b>. ¡Rápidos, eficaces y económicos!</p>
+        <a href="#contacto" class="btn btn-success btn-lg shadow-pop mt-3">Solicita tu presupuesto</a>
+      </div>
+      <div class="col-md-5 text-center scale-up" data-aos="zoom-in">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo Multiservicios Ortiz" style="max-width:180px;" class="rounded-circle border border-3 border-success shadow-pop">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGOS CLIENTES -->
+<div class="container mb-4">
+  <div class="row justify-content-center" data-aos="fade-up">
+    <div class="col-auto">
+      <img src="{{ url_for('static', filename='images/cliente1.png') }}" alt="Cliente 1" height="44" class="mx-3 grayscale-hover">
+      <img src="{{ url_for('static', filename='images/cliente2.png') }}" alt="Cliente 2" height="44" class="mx-3 grayscale-hover">
+      <img src="{{ url_for('static', filename='images/cliente3.png') }}" alt="Cliente 3" height="44" class="mx-3 grayscale-hover">
+      <img src="{{ url_for('static', filename='images/cliente4.png') }}" alt="Cliente 4" height="44" class="mx-3 grayscale-hover">
+    </div>
+  </div>
+</div>
+
+<!-- CERTIFICACIONES/GARANTÍAS -->
+<div class="container mb-5">
+  <div class="row justify-content-center text-center" data-aos="fade-up">
+    <div class="col-6 col-md-3 mb-3">
+      <i class="bi bi-shield-check display-4 text-success"></i>
+      <div class="fw-bold mt-2">Empresa asegurada</div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+      <i class="bi bi-clock-history display-4 text-success"></i>
+      <div class="fw-bold mt-2">+15 años experiencia</div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+      <i class="bi bi-patch-check display-4 text-success"></i>
+      <div class="fw-bold mt-2">Presupuesto sin compromiso</div>
+    </div>
+    <div class="col-6 col-md-3 mb-3">
+      <i class="bi bi-people-fill display-4 text-success"></i>
+      <div class="fw-bold mt-2">Atención a comunidades</div>
+    </div>
+  </div>
+</div>
+
+<!-- GALERÍA DE TRABAJOS (carousel) -->
+<div class="container mb-5" data-aos="fade-up">
+  <h2 class="text-center mb-4 text-success fw-bold">Trabajos realizados</h2>
+  <div id="carouselTrabajos" class="carousel slide shadow rounded" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <img src="{{ url_for('static', filename='images/trabajo1.jpg') }}" class="d-block w-100" alt="Trabajo 1">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='images/trabajo2.jpg') }}" class="d-block w-100" alt="Trabajo 2">
+      </div>
+      <div class="carousel-item">
+        <img src="{{ url_for('static', filename='images/trabajo3.jpg') }}" class="d-block w-100" alt="Trabajo 3">
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselTrabajos" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselTrabajos" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+</div>
+
+<!-- SERVICIOS -->
+<div class="container mb-5">
+  <h2 class="text-center mb-4 text-success fw-bold">Nuestros servicios</h2>
+  <div class="row g-4">
+    <div class="col-6 col-md-4 text-center scale-up" data-aos="fade-up">
+      <div class="bg-white shadow rounded p-4 h-100">
+        <i class="bi bi-droplet-half display-5 text-success"></i>
+        <h5 class="mt-3">Desatascos 24h</h5>
+        <p>Solucionamos atascos y urgencias rápidamente, con equipo especializado.</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 text-center scale-up" data-aos="fade-up" data-aos-delay="100">
+      <div class="bg-white shadow rounded p-4 h-100">
+        <i class="bi bi-tools display-5 text-success"></i>
+        <h5 class="mt-3">Fontanería</h5>
+        <p>Instalación, reparación y mantenimiento de fontanería general y de urgencias.</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 text-center scale-up" data-aos="fade-up" data-aos-delay="200">
+      <div class="bg-white shadow rounded p-4 h-100">
+        <i class="bi bi-house-gear display-5 text-success"></i>
+        <h5 class="mt-3">Comunidades</h5>
+        <p>Mantenimiento preventivo y correctivo para comunidades de vecinos.</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 text-center scale-up" data-aos="fade-up" data-aos-delay="300">
+      <div class="bg-white shadow rounded p-4 h-100">
+        <i class="bi bi-search display-5 text-success"></i>
+        <h5 class="mt-3">Inspección con cámara</h5>
+        <p>Localización de fugas y problemas ocultos sin obras.</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 text-center scale-up" data-aos="fade-up" data-aos-delay="400">
+      <div class="bg-white shadow rounded p-4 h-100">
+        <i class="bi bi-droplet display-5 text-success"></i>
+        <h5 class="mt-3">Limpieza de pozos</h5>
+        <p>Vaciado, limpieza y revisión de pozos y depósitos.</p>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 text-center scale-up" data-aos="fade-up" data-aos-delay="500">
+      <div class="bg-white shadow rounded p-4 h-100">
+        <i class="bi bi-lightning-charge display-5 text-success"></i>
+        <h5 class="mt-3">Urgencias eléctricas</h5>
+        <p>Reparaciones rápidas para averías eléctricas urgentes.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIOS -->
+<div class="bg-success-subtle py-5 mb-5">
+  <div class="container">
+    <h2 class="text-center text-success fw-bold mb-4">Opiniones de nuestros clientes</h2>
+    <div class="row justify-content-center">
+      <div class="col-md-4 mb-3" data-aos="zoom-in">
+        <div class="card shadow">
+          <div class="card-body">
+            <p class="card-text">“Vinieron en menos de una hora y lo dejaron todo perfecto. Muy profesionales.”</p>
+            <div class="d-flex align-items-center mt-3">
+              <img src="{{ url_for('static', filename='images/testimonio1.jpg') }}" alt="Cliente 1" width="48" height="48" class="rounded-circle me-2 border border-success">
+              <div>
+                <b>José M.</b><br>
+                <small class="text-success">Motril</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3" data-aos="zoom-in" data-aos-delay="100">
+        <div class="card shadow">
+          <div class="card-body">
+            <p class="card-text">“Serios y rápidos, da gusto con empresas así. Los recomiendo totalmente.”</p>
+            <div class="d-flex align-items-center mt-3">
+              <img src="{{ url_for('static', filename='images/testimonio2.jpg') }}" alt="Cliente 2" width="48" height="48" class="rounded-circle me-2 border border-success">
+              <div>
+                <b>Luisa F.</b><br>
+                <small class="text-success">Salobreña</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3" data-aos="zoom-in" data-aos-delay="200">
+        <div class="card shadow">
+          <div class="card-body">
+            <p class="card-text">“Me resolvieron un atasco en la comunidad y revisaron todo sin coste extra. ¡Un 10!”</p>
+            <div class="d-flex align-items-center mt-3">
+              <img src="{{ url_for('static', filename='images/testimonio3.jpg') }}" alt="Cliente 3" width="48" height="48" class="rounded-circle me-2 border border-success">
+              <div>
+                <b>Carlos P.</b><br>
+                <small class="text-success">Almuñécar</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAPA -->
+<div class="container mb-5" data-aos="fade-up">
+  <h2 class="text-center mb-4 text-success fw-bold">¿Dónde trabajamos?</h2>
+  <div class="row justify-content-center">
+    <div class="col-md-8 shadow">
+      <div class="ratio ratio-16x9 rounded">
+        <iframe src="https://www.google.com/maps?q=Costa+Tropical+Granada,+Granada,+España&z=11&output=embed"
+          width="100%" height="320" style="border:0;" allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="container mb-5" data-aos="fade-up">
+  <h2 class="text-center mb-4 text-success fw-bold">Preguntas frecuentes</h2>
+  <div class="accordion" id="faqAccordion">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="faq1"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse1" aria-expanded="true" aria-controls="faqCollapse1">
+        ¿Atendéis urgencias fuera de horario?
+      </button></h2>
+      <div id="faqCollapse1" class="accordion-collapse collapse show" aria-labelledby="faq1" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">Sí, disponemos de servicio 24h para desatascos y fontanería urgente.</div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="faq2"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse2" aria-expanded="false" aria-controls="faqCollapse2">
+        ¿Trabajáis para comunidades de vecinos?
+      </button></h2>
+      <div id="faqCollapse2" class="accordion-collapse collapse" aria-labelledby="faq2" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">Sí, ofrecemos contratos de mantenimiento y servicios puntuales para comunidades.</div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="faq3"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse3" aria-expanded="false" aria-controls="faqCollapse3">
+        ¿Dais presupuesto sin compromiso?
+      </button></h2>
+      <div id="faqCollapse3" class="accordion-collapse collapse" aria-labelledby="faq3" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">¡Por supuesto! Llámanos o escríbenos y te informamos sin coste alguno.</div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="faq4"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse4" aria-expanded="false" aria-controls="faqCollapse4">
+        ¿Qué zonas cubrís?
+      </button></h2>
+      <div id="faqCollapse4" class="accordion-collapse collapse" aria-labelledby="faq4" data-bs-parent="#faqAccordion">
+        <div class="accordion-body">Principalmente la Costa Tropical (Motril, Salobreña, Almuñécar) y alrededores.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACTO -->
+<div class="container mb-5" id="contacto" data-aos="fade-up">
+  <h2 class="text-center mb-4 text-success fw-bold">Contacto</h2>
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-5">
+      <form>
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          <input type="text" class="form-control" placeholder="Tu nombre" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Teléfono</label>
+          <input type="tel" class="form-control" placeholder="Tu teléfono" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Consulta</label>
+          <textarea class="form-control" rows="3" placeholder="¿En qué podemos ayudarte?" required></textarea>
+        </div>
+        <button class="btn btn-success btn-lg" type="submit">Enviar mensaje</button>
+      </form>
+    </div>
+    <div class="col-md-5 d-flex flex-column justify-content-center align-items-center">
+      <div class="mb-3">
+        <i class="bi bi-telephone-inbound-fill display-5 text-success"></i>
+        <span class="fs-4 ms-2">695 369 044</span>
+      </div>
+      <div class="mb-3">
+        <i class="bi bi-envelope-fill display-5 text-success"></i>
+        <span class="fs-5 ms-2">gestion@multiserviciosortiz.es</span>
+      </div>
+      <div class="mb-3">
+        <i class="bi bi-geo-alt-fill display-5 text-success"></i>
+        <span class="fs-5 ms-2">Salobreña (Granada)</span>
+      </div>
+      <div>
+        <a href="https://wa.me/34695369044" class="me-3 text-success" target="_blank"><i class="bi bi-whatsapp display-6"></i></a>
+        <a href="#" class="text-success"><i class="bi bi-facebook display-6"></i></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botón WhatsApp flotante -->
+<a href="https://wa.me/34695369044" class="whatsapp-float" target="_blank" title="Contactar por WhatsApp">
+  <i class="bi bi-whatsapp"></i>
+</a>
+<!-- Botón llamada flotante (solo móvil) -->
+<a href="tel:695369044" class="call-float d-md-none" title="Llamar">
+  <i class="bi bi-telephone"></i>
+</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+  AOS.init();
+</script>
+</body>
+</html>
