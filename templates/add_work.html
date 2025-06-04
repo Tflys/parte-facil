@@ -1,85 +1,156 @@
 {% extends "base.html" %}
 {% block title %}Añadir Parte de Trabajo{% endblock %}
 {% block content %}
-<h2 class="mb-4">Nuevo parte de trabajo</h2>
-<form method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
-    {# Fecha/hora inicio #}
-    <div class="mb-3">
-        {{ form.fecha.label }} {{ form.fecha(type="datetime-local", class="form-control") }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<style>
+    .form-card { max-width: 600px; margin: 0 auto; border-radius: 1rem; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 2rem 2rem 1rem 2rem;}
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; animation: fadeIn .5s; }
+    .progress { height: 24px;}
+    .progress-bar { font-size: 1rem; }
+    .admin-section { border: 1.5px dashed #00ba56; background: #eaffec; border-radius: .7rem; padding: 1rem 1.3rem; margin-bottom: 1rem; margin-top: 1rem;}
+    @keyframes fadeIn { from { opacity: 0;} to { opacity: 1;} }
+</style>
+<div class="form-card">
+    <h2 class="mb-4 text-center"><i class="bi bi-file-earmark-plus"></i> Nuevo parte de trabajo</h2>
+    <div class="progress mb-4">
+        <div class="progress-bar bg-success" id="progressBar" style="width: 33%;">Paso 1 de 3</div>
     </div>
-    {# Fecha/hora fin #}
-    <div class="mb-3">
-        {{ form.fecha_fin.label }} {{ form.fecha_fin(type="datetime-local", class="form-control") }}
-    </div>
-    {# Dirección #}
-    <div class="mb-3">
-        {{ form.direccion.label(class="form-label") }}
-        {{ form.direccion(class="form-control") }}
-    </div>
-    {# Tipo de trabajo #}
-    <div class="mb-3">
-        {{ form.tipo_trabajo.label(class="form-label") }}
-        {{ form.tipo_trabajo(class="form-control") }}
-    </div>
-    {# Cliente #}
-    <div class="mb-3">
-        {{ form.cliente.label(class="form-label") }}
-        {{ form.cliente(class="form-control") }}
-    </div>
-    {# Materiales usados #}
-    <div class="mb-3">
-        {{ form.materiales_usados.label(class="form-label") }}
-        {{ form.materiales_usados(class="form-control", rows="2") }}
-    </div>
-    {# Horas trabajadas #}
-    <div class="mb-3">
-        {{ form.horas.label(class="form-label") }}
-        {{ form.horas(class="form-control") }}
-    </div>
-    {# Selección trabajador solo para admin #}
-    {% if es_admin %}
-    <div class="mb-3">
-        {{ form.trabajador.label(class="form-label") }}
-        {{ form.trabajador(class="form-select") }}
-    </div>
-    {% endif %}
-    {# Foto #}
-    <div class="mb-3">
-        {{ form.foto.label(class="form-label") }}
-        {{ form.foto(class="form-control") }}
-    </div>
-    {# Firma #}
-    <div class="mb-3">
-        {{ form.firma.label(class="form-label") }}
-        {{ form.firma(class="form-control") }}
-    </div>
-    {# Terminado #}
-    <div class="mb-3">
-        {{ form.terminado.label }} {{ form.terminado() }}
-    </div>
-    {# Observaciones #}
-    <div>
-        {{ form.observaciones.label }}<br>
-        {{ form.observaciones(rows=4, cols=60) }}
-    </div>
-    {# Estado solo para admin #}
-    {% if es_admin %}
-    <div class="form-group mt-3">
-        {{ form.estado.label(class="form-label") }}
-        {{ form.estado(class="form-select") }}
-    </div>
-    {% endif %}
+    <form id="workForm" method="POST" enctype="multipart/form-data" autocomplete="off">
+        {{ form.hidden_tag() }}
 
-    <br>
-    <button type="submit" class="btn btn-primary">Guardar parte</button>
-    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">Cancelar</a>
-</form>
+        <!-- Paso 1 -->
+        <div class="wizard-step active" id="step-1">
+            <div class="mb-3">
+                <label for="{{ form.fecha.id }}" class="form-label">Fecha/hora inicio <span class="text-danger">*</span></label>
+                <input type="datetime-local" name="{{ form.fecha.name }}" id="{{ form.fecha.id }}" class="form-control" required value="{{ form.fecha.data|default('') }}">
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.fecha_fin.id }}" class="form-label">Fecha/hora fin</label>
+                <input type="datetime-local" name="{{ form.fecha_fin.name }}" id="{{ form.fecha_fin.id }}" class="form-control" value="{{ form.fecha_fin.data|default('') }}">
+            </div>
+            <div class="mb-3">
+                {{ form.direccion.label(class="form-label") }} <span class="text-danger">*</span>
+                {{ form.direccion(class="form-control", placeholder="Ej: C/ Ejemplo 123, 1ºB") }}
+            </div>
+            <div class="mb-3">
+                {{ form.cliente.label(class="form-label") }} <span class="text-danger">*</span>
+                {{ form.cliente(class="form-control", placeholder="Nombre o referencia del cliente") }}
+            </div>
+            <div class="d-grid gap-2 mt-3">
+                <button type="button" class="btn btn-primary" onclick="gotoStep(2)">
+                    Siguiente <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
 
-{# Mostrar errores #}
-{% for field, errors in form.errors.items() %}
-    <div class="alert alert-danger mt-2">
-        {{ form[field].label.text }}: {{ errors|join(', ') }}
-    </div>
-{% endfor %}
+        <!-- Paso 2 -->
+        <div class="wizard-step" id="step-2">
+            <div class="mb-3">
+                {{ form.tipo_trabajo.label(class="form-label") }} <span class="text-danger">*</span>
+                {{ form.tipo_trabajo(class="form-control", placeholder="Ej: Desatasco, fontanería...") }}
+            </div>
+            <div class="mb-3">
+                {{ form.horas.label(class="form-label") }} <span class="text-danger">*</span>
+                {{ form.horas(class="form-control", placeholder="Ej: 2.5") }}
+                <div class="form-text">Total de horas dedicadas</div>
+            </div>
+            <div class="mb-3">
+                <label for="materialesSwitch" class="form-label">
+                    <i class="bi bi-box-seam"></i> ¿Has usado materiales?
+                    <input type="checkbox" id="materialesSwitch" onclick="toggleMateriales()" class="form-check-input ms-2">
+                </label>
+                <div id="materialesDiv" style="display:none;">
+                    {{ form.materiales_usados(class="form-control mt-2", rows="2", placeholder="Ej: Tubo PVC, codo 90º...") }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form.observaciones.label(class="form-label") }}
+                {{ form.observaciones(class="form-control", rows=3, placeholder="Observaciones, detalles, incidencias...") }}
+            </div>
+            <div class="d-flex justify-content-between gap-2 mt-3">
+                <button type="button" class="btn btn-secondary" onclick="gotoStep(1)">
+                    <i class="bi bi-arrow-left"></i> Anterior
+                </button>
+                <button type="button" class="btn btn-primary" onclick="gotoStep(3)">
+                    Siguiente <i class="bi bi-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="wizard-step" id="step-3">
+            <div class="mb-3">
+                {{ form.foto.label(class="form-label") }} <i class="bi bi-image"></i>
+                {{ form.foto(class="form-control") }}
+                <div class="form-text">Puedes añadir una foto del trabajo (opcional)</div>
+            </div>
+            <div class="mb-3">
+                {{ form.firma.label(class="form-label") }} <i class="bi bi-pencil"></i>
+                {{ form.firma(class="form-control") }}
+                <div class="form-text">Firma digital, si procede</div>
+            </div>
+            <div class="mb-3 form-check">
+                {{ form.terminado(class="form-check-input", id="terminadoCheck") }}
+                <label class="form-check-label" for="terminadoCheck">
+                    {{ form.terminado.label.text }} ¿Trabajo finalizado?
+                </label>
+            </div>
+            {% if es_admin %}
+            <div class="admin-section">
+                <div class="form-section-title mb-2"><i class="bi bi-person-gear"></i> Opciones avanzadas (administrador)</div>
+                <div class="mb-3">
+                    {{ form.trabajador.label(class="form-label") }}
+                    {{ form.trabajador(class="form-select") }}
+                </div>
+                <div class="form-group mt-3">
+                    {{ form.estado.label(class="form-label") }}
+                    {{ form.estado(class="form-select") }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="d-flex justify-content-between gap-2 mt-3">
+                <button type="button" class="btn btn-secondary" onclick="gotoStep(2)">
+                    <i class="bi bi-arrow-left"></i> Anterior
+                </button>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-check-circle"></i> Guardar parte
+                </button>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mt-2 w-100">Cancelar</a>
+        </div>
+    </form>
+    {% for field, errors in form.errors.items() %}
+        <div class="alert alert-danger mt-2">
+            {{ form[field].label.text }}: {{ errors|join(', ') }}
+        </div>
+    {% endfor %}
+</div>
+<script>
+    let step = 1;
+    function gotoStep(n) {
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById("step-" + i).classList.remove("active");
+        }
+        document.getElementById("step-" + n).classList.add("active");
+        // Actualizar barra de progreso
+        const pct = n * 33;
+        document.getElementById("progressBar").style.width = pct + "%";
+        document.getElementById("progressBar").innerText = `Paso ${n} de 3`;
+        step = n;
+        window.scrollTo({top: 0, behavior: "smooth"});
+    }
+    function toggleMateriales() {
+        let chk = document.getElementById('materialesSwitch');
+        let div = document.getElementById('materialesDiv');
+        div.style.display = chk.checked ? 'block' : 'none';
+        if (!chk.checked) {
+            document.querySelector('[name="materiales_usados"]').value = '';
+        }
+    }
+    document.addEventListener("DOMContentLoaded", function() {
+        gotoStep(1);
+        toggleMateriales();
+    });
+</script>
 {% endblock %}
