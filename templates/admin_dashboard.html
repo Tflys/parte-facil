@@ -2,41 +2,99 @@
 {% block title %}Estadísticas - Dashboard Admin{% endblock %}
 {% block content %}
 <h2 class="mb-4">Panel de Estadísticas</h2>
+{% if not demo %}
+    <p class="text-muted">Bienvenido al panel de estadísticas. Aquí puedes ver un resumen de la actividad de la aplicación.</p>
+{% else %}
+    <p class="text-muted">Estás viendo datos simulados en modo demo. Los datos no son reales.</p>
+{% endif %}
+
+<div class="mb-3 text-end">
+  {% if demo %}
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+      <i class="bi bi-eye"></i> Volver a modo real
+    </a>
+    <span class="badge bg-warning text-dark ms-3" style="font-size:1rem;">
+      <i class="bi bi-exclamation-triangle"></i> Estás viendo datos simulados (demo)
+    </span>
+  {% else %}
+    <a href="{{ url_for('admin_dashboard', demo=1) }}" class="btn btn-outline-primary">
+      <i class="bi bi-play-circle"></i> Modo demo
+    </a>
+  {% endif %}
+</div>
+
 <div class="row mb-4">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-bg-primary mb-3">
             <div class="card-body">
                 <h5 class="card-title">Partes registrados</h5>
-                <p class="display-5">{{ total_trabajos }}</p>
+                <p class="display-5">{{ total_trabajos or 0 }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="card text-bg-success mb-3">
             <div class="card-body">
                 <h5 class="card-title">Trabajadores</h5>
-                <p class="display-5">{{ total_trabajadores }}</p>
+                <p class="display-5">{{ total_trabajadores or 0 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Horas totales</h5>
+                <p class="display-5">{{ horas_totales or 0 }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Clientes distintos</h5>
+                <p class="display-5">{{ clientes_distintos or 0 }}</p>
             </div>
         </div>
     </div>
 </div>
-<h4 class="mt-4">Horas totales por trabajador</h4>
-<table class="table table-striped mb-4">
-    <thead>
-        <tr>
-            <th>Trabajador</th>
-            <th>Horas</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for nombre, total_horas in horas_por_trabajador %}
-        <tr>
-            <td>{{ nombre }}</td>
-            <td>{{ '%.2f' | format(total_horas or 0) }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h4>Estados de los partes</h4>
+        <canvas id="estadosPieChart" width="400" height="230"></canvas>
+    </div>
+    <div class="col-md-6">
+        <h4>Ranking de trabajadores</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Puesto</th>
+                    <th>Trabajador</th>
+                    <th>Partes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nombre, partes in ranking_trabajadores or [] %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ nombre }}</td>
+                    <td>{{ partes }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<a href="{{ url_for('exportar_partes_excel') }}" class="btn btn-outline-success mb-4">
+  <i class="bi bi-file-earmark-excel"></i> Exportar partes a Excel
+</a>
+<a href="{{ url_for('exportar_partes_pdf') }}" class="btn btn-outline-danger mb-4">
+  <i class="bi bi-file-earmark-pdf"></i> Exportar partes a PDF
+</a>
+
+<h4 class="mt-4">Evolución mensual de partes</h4>
+<canvas id="trabajosMesChart" width="600" height="300"></canvas>
 
 <h4 class="mt-4">Trabajos por cliente</h4>
 <table class="table table-striped mb-4">
@@ -47,7 +105,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for cliente, total in trabajos_por_cliente %}
+        {% for cliente, total in trabajos_por_cliente or [] %}
         <tr>
             <td>{{ cliente }}</td>
             <td>{{ total }}</td>
@@ -56,33 +114,77 @@
     </tbody>
 </table>
 
-<h4 class="mt-4">Evolución mensual de partes</h4>
-<canvas id="trabajosMesChart" width="600" height="300"></canvas>
+<h4 class="mt-4">Últimos partes registrados</h4>
+<table class="table table-striped mb-4">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Trabajador</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for parte in ultimos_partes or [] %}
+        <tr>
+            <td>{{ parte.fecha.strftime('%Y-%m-%d') if parte.fecha else '' }}</td>
+            <td>{{ parte.trabajador.nombre if parte.trabajador else '' }}</td>
+            <td>{{ parte.cliente }}</td>
+            <td>{{ parte.estado }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Volver al panel</a>
 {% endblock %}
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Gráfico mensual
     var ctx = document.getElementById('trabajosMesChart').getContext('2d');
     var chart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: [
-                {% for mes, _ in trabajos_por_mes %}
+                {% for mes, _ in trabajos_por_mes or [] %}
                     "{{ mes }}",
                 {% endfor %}
             ],
             datasets: [{
                 label: 'Partes por mes',
                 data: [
-                    {% for _, total in trabajos_por_mes %}
+                    {% for _, total in trabajos_por_mes or [] %}
                         {{ total }},
                     {% endfor %}
                 ],
                 fill: false,
                 borderColor: 'blue',
                 tension: 0.2
+            }]
+        }
+    });
+
+    // Pie chart de estados
+    var ctx2 = document.getElementById('estadosPieChart').getContext('2d');
+    var chart2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                {% for estado, _ in estados_contador or [] %}
+                    "{{ estado }}",
+                {% endfor %}
+            ],
+            datasets: [{
+                data: [
+                    {% for _, total in estados_contador or [] %}
+                        {{ total }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    '#36a2eb', '#4caf50', '#ffc107', '#e74c3c', '#8e44ad', '#27ae60'
+                ]
             }]
         }
     });

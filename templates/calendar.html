@@ -27,6 +27,16 @@
   {% endif %}
 </div>
 <div id="calendar"></div>
+
+<!-- LEYENDA DE COLORES -->
+<div class="mt-4 mb-4">
+  <span class="badge" style="background:#4caf50">Pagado</span>  
+  <span class="badge" style="background:#ffc107; color:#333">Pendiente cobro</span>
+  <span class="badge" style="background:#ff9800">Pendiente facturar</span>
+  <span class="badge" style="background:#e74c3c">Sin terminar</span>
+  <span class="badge" style="background:#999">Otro</span>
+</div>
+
 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Volver al panel</a>
 {% endblock %}
 
@@ -49,12 +59,12 @@ document.addEventListener('DOMContentLoaded', function() {
         eventTimeFormat: {
           hour: '2-digit',
           minute: '2-digit',
-          hour12: false // o true si prefieres 12h
+          hour12: false
         },
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
         },
         dateClick: function(info) {
             calendar.changeView('timeGridDay', info.dateStr);
@@ -91,6 +101,13 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalDetalleBody').innerHTML = detalle;
             var myModal = new bootstrap.Modal(document.getElementById('detalleModal'));
             myModal.show();
+        },
+        eventDidMount: function(info) {
+            // Para que el color se aplique bien en cualquier vista
+            if (info.event.backgroundColor) {
+                info.el.style.backgroundColor = info.event.backgroundColor;
+                info.el.style.color = "#222";
+            }
         }
     });
     calendar.render();

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Partes de trabajo</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 13px; }
+        h2 { color: #2471A3; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
+        th, td { border: 1px solid #bbb; padding: 5px; }
+        th { background-color: #D5F5E3; }
+        tr:nth-child(even) { background: #F8F9F9; }
+    </style>
+</head>
+<body>
+    <h2>Partes de trabajo</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Dirección</th>
+                <th>Tipo</th>
+                <th>Cliente</th>
+                <th>Materiales</th>
+                <th>Horas</th>
+                <th>Estado</th>
+                <th>Trabajador</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in partes %}
+            <tr>
+                <td>{{ t.id }}</td>
+                <td>{{ t.fecha.strftime('%Y-%m-%d %H:%M') if t.fecha else '' }}</td>
+                <td>{{ t.direccion }}</td>
+                <td>{{ t.tipo_trabajo }}</td>
+                <td>{{ t.cliente }}</td>
+                <td>{{ t.materiales_usados }}</td>
+                <td>{{ t.horas }}</td>
+                <td>{{ t.estado }}</td>
+                <td>{{ t.trabajador.nombre if t.trabajador else '' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
