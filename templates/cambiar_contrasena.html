@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Cambiar contraseña{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width: 500px;">
+    <h2 class="mb-4 text-center"><i class="bi bi-key"></i> Cambiar contraseña</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.actual.label(class="form-label") }}
+            {{ form.actual(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.nueva.label(class="form-label") }}
+            {{ form.nueva(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.nueva2.label(class="form-label") }}
+            {{ form.nueva2(class="form-control") }}
+        </div>
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">Cambiar contraseña</button>
+            <a href="{{ url_for('perfil') }}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Mi Perfil{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width: 500px;">
+    <h2 class="mb-4 text-center"><i class="bi bi-person-circle"></i> Mi perfil</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.nombre.label(class="form-label") }}
+            {{ form.nombre(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control", readonly=true) }}
+        </div>
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Actualizar perfil</button>
+            <a href="{{ url_for('cambiar_contrasena') }}" class="btn btn-outline-primary">Cambiar contraseña</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

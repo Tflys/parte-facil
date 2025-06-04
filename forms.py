@@ -52,3 +52,36 @@ class UserForm(FlaskForm):
     password2 = PasswordField('Repetir contraseña', validators=[DataRequired(), EqualTo('password', message="Las contraseñas deben coincidir")])
     rol = RadioField('Rol', choices=[('trabajador', 'Trabajador'), ('admin', 'Administrador')], default='trabajador', validators=[DataRequired()])
     submit = SubmitField('Crear usuario')
+
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, Email
+
+class PerfilForm(FlaskForm):
+    nombre = StringField('Nombre', validators=[DataRequired()])
+    email = StringField('Correo electrónico', validators=[DataRequired(), Email()])
+    submit = SubmitField('Actualizar perfil')
+
+
+class CambiarContrasenaForm(FlaskForm):
+    actual = PasswordField('Contraseña actual', validators=[DataRequired()])
+    nueva = PasswordField('Nueva contraseña', validators=[DataRequired()])
+    nueva2 = PasswordField('Repite la nueva contraseña', validators=[DataRequired(), EqualTo('nueva', message='Las contraseñas deben coincidir')])
+    submit = SubmitField('Cambiar contraseña')
+
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, SelectField, PasswordField
+from wtforms.validators import DataRequired, Email, EqualTo, Optional
+
+class EditarUsuarioForm(FlaskForm):
+    nombre = StringField('Nombre', validators=[DataRequired()])
+    email = StringField('Correo electrónico', validators=[DataRequired(), Email()])
+    rol = SelectField('Rol', choices=[('trabajador', 'Trabajador'), ('admin', 'Administrador')])
+    submit = SubmitField('Guardar cambios')
+
+class CambiarContrasenaAdminForm(FlaskForm):
+    nueva = PasswordField('Nueva contraseña', validators=[Optional()])
+    nueva2 = PasswordField('Repite la nueva contraseña', validators=[Optional(), EqualTo('nueva', message="Las contraseñas deben coincidir")])
+    submit_c = SubmitField('Cambiar contraseña')

@@ -2,7 +2,7 @@
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('empresa') }}">
       <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo" height="32" style="vertical-align: middle;">
-      <span>Multiservicios Ortiz</span>
+      <span>Portal de Gestión Parte-Facil</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
       aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,16 +23,39 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Estadísticas</a>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('listado_usuarios') }}">Gestión usuarios</a>
             </li>
           {% endif %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('add_work') }}">Nuevo parte</a>
           </li>
         </ul>
-        <span class="navbar-text me-2">
-          {{ current_user.nombre }} ({{ current_user.rol }})
-        </span>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i> {{ current_user.nombre }} ({{ current_user.rol }})
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+              <li>
+                <a class="dropdown-item" href="{{ url_for('perfil') }}">
+                  <i class="bi bi-person"></i> Mi perfil
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('cambiar_contrasena') }}">
+                  <i class="bi bi-key"></i> Cambiar contraseña
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="{{ url_for('logout') }}">
+                  <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
       {% else %}
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Editar usuario{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width: 500px;">
+    <h2 class="mb-4 text-center"><i class="bi bi-person-gear"></i> Editar usuario</h2>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">
+            {{ form.nombre.label(class="form-label") }}
+            {{ form.nombre(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ form.rol.label(class="form-label") }}
+            {{ form.rol(class="form-select") }}
+        </div>
+        <div class="d-grid gap-2">
+            <button type="submit" name="submit" class="btn btn-success"><i class="bi bi-save"></i> Guardar cambios</button>
+            <a href="{{ url_for('listado_usuarios') }}" class="btn btn-outline-secondary">Volver</a>
+        </div>
+    </form>
+    <hr>
+    <h4 class="mb-3"><i class="bi bi-key"></i> Restablecer contraseña</h4>
+    <form method="POST">
+        {{ c_form.hidden_tag() }}
+        <div class="mb-3">
+            {{ c_form.nueva.label(class="form-label") }}
+            {{ c_form.nueva(class="form-control") }}
+        </div>
+        <div class="mb-3">
+            {{ c_form.nueva2.label(class="form-label") }}
+            {{ c_form.nueva2(class="form-control") }}
+        </div>
+        <div class="d-grid gap-2">
+            <button type="submit" name="submit_c" class="btn btn-warning"><i class="bi bi-arrow-repeat"></i> Cambiar contraseña</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
