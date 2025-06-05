@@ -1,4 +1,4 @@
-# 🚰 Multiservicios Desatascos Ortiz S.L.
+# 🚰 Parte-Fácil
 
 > Aplicación web interna para la gestión de partes de trabajo, empleados y clientes.
 
@@ -16,7 +16,7 @@
 
 ## 📋 Descripción
 
-**Multiservicios Desatascos Ortiz S.L.** es una plataforma web para el control y gestión de trabajos, empleados y clientes, con partes de trabajo, asignación de tareas, calendario avanzado y estadísticas.  
+**Parte-Fácil** es una plataforma web para el control y gestión de trabajos, empleados y clientes, con partes de trabajo, asignación de tareas, calendario avanzado y estadísticas.  
 La app es responsive y segura, con sistema de roles: **Administrador** y **Trabajador**.
 
 ---
@@ -33,14 +33,17 @@ La app es responsive y segura, con sistema de roles: **Administrador** y **Traba
 | [SQLite](https://www.sqlite.org/)                   | Base de datos ligera por defecto |
 | [Werkzeug Security](https://werkzeug.palletsprojects.com/) | Hash de contraseñas |
 | [Jinja2](https://jinja.palletsprojects.com/)        | Motor de plantillas en Flask    |
+| [Pandas](https://pandas.pydata.org/)                  | Procesamiento de datos y exportación a Excel |
+| [Openpyxl](https://openpyxl.readthedocs.io/)          | Motor para generar archivos Excel (.xlsx) |
+| [xhtml2pdf](https://xhtml2pdf.readthedocs.io/)        | Generador de PDFs a partir de plantillas HTML |
 
 ---
 
 ## 🏁 Instalación rápida
 
 
-git clone https://github.com/Tflys/multiservicios-ortiz.git
-cd multiservicios-ortiz
+git clone https://github.com/Tflys/parte-facil.git
+cd parte-facil
 python -m venv venv
 # Windows:
 venv\Scripts\activate
@@ -91,6 +94,16 @@ multiservicios-ortiz/
 
 📊 Dashboard de estadísticas y KPIs
 
+📤 Exportación de partes de trabajo a PDF y Excel
+
+📂 Gestión avanzada desde panel de administrador: estadísticas, ranking, clientes y estados
+
+🧠 Modo demo activable con datos ficticios (útil para pruebas y presentaciones)
+
+🗂️ Filtros por cliente y trabajador en el calendario (FullCalendar)
+
+📎 Subida de imágenes (foto y firma) con validación segura y control de tipo/tamaño
+
 🔒 Seguridad: contraseñas cifradas, CSRF, control de roles y subida protegida
 
 🔐 Seguridad aplicada
@@ -131,11 +144,9 @@ MIT License
 
 ---
 
-### **Extras que puedes añadir fácilmente:**
+## 📤 Ejemplo de exportación
 
-- Capturas de pantalla (`/static/images/screenshot1.png` y enlazarlas así):
-  ```markdown
-  ![Dashboard ejemplo](static/images/screenshot1.png)
-GIFs o vídeo corto (subido a YouTube o como archivo)
+Desde el menú de usuario o admin puedes exportar todos tus partes:
 
-Badges de Shields.io personalizados (build, version, code quality, etc.)
+![Exportación PDF](static/images/export_pdf.png)
+![Exportación Excel](static/images/export_excel.png)
