@@ -88,8 +88,6 @@ multiservicios-ortiz/
 
 ⏱️ Control de horas trabajadas
 
-📸 Subida de foto y firma digital (validación segura)
-
 📆 Calendario avanzado (FullCalendar) con filtros por cliente y trabajador
 
 📊 Dashboard de estadísticas y KPIs
@@ -103,8 +101,6 @@ multiservicios-ortiz/
 🗂️ Filtros por cliente y trabajador en el calendario (FullCalendar)
 
 📎 Subida de imágenes (foto y firma) con validación segura y control de tipo/tamaño
-
-🔒 Seguridad: contraseñas cifradas, CSRF, control de roles y subida protegida
 
 🔐 Seguridad aplicada
 Contraseñas cifradas (hash scrypt/pbkdf2)
@@ -135,7 +131,7 @@ No debug en producción
 📧 Contacto
 Desarrollado por [Francisco Alabarce]
 Email: franalabarce@gmail.com
-Proyecto para Multiservicios Desatascos Ortiz S.L.
+Proyecto para Multiservicios Desatascos Ortiz S.L. y TOTAL POOL S.L.
 
 ⚖️ Licencia
 MIT License
