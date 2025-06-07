@@ -15,8 +15,7 @@ env/
 *.env
 
 # Flask, SQLite database
-*.db
-*.sqlite3
+
 
 # VSCode config
 .vscode/
