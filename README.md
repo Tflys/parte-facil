@@ -1,4 +1,4 @@
-# 🚰 Parte-Fácil
+# ✅ Parte-Fácil
 
 > Aplicación web interna para la gestión de partes de trabajo, empleados y clientes.
 
@@ -39,19 +39,35 @@ La app es responsive y segura, con sistema de roles: **Administrador** y **Traba
 
 ---
 
-## 🏁 Instalación rápida
-
+🏁 Instalación rápida
+### Opción 1: Entorno local (Python)
 
 git clone https://github.com/Tflys/parte-facil.git
 cd parte-facil
 python -m venv venv
+
 # Windows:
 venv\Scripts\activate
 # Linux/Mac:
 source venv/bin/activate
+
 pip install -r requirements.txt
 python app.py
 Abre http://127.0.0.1:5000 en tu navegador.
+
+### ✅ Opción 2: ¡Todo en Docker! (recomendado)
+Solo necesitas tener Docker instalado.
+
+
+git clone https://github.com/Tflys/parte-facil.git
+cd parte-facil
+
+# (Opcional: asegúrate de que no hay nada usando el puerto 5000)
+
+docker compose build
+docker compose up
+Abre http://localhost:5000 en tu navegador.
+Para detener la app: CTRL+C o en otra terminal docker compose down
 
 📂 Estructura del proyecto
 <details>
