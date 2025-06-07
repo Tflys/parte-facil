@@ -1,0 +1,35 @@
+/* static/css/admin_dashboard.css */
+.kpi-card {
+  border-radius: 1.3rem;
+  box-shadow: 0 6px 32px rgba(0,186,86,0.08);
+  background: #fff;
+  padding: 1.5rem 1.2rem;
+  text-align: center;
+  transition: transform 0.25s;
+  min-width: 180px;
+}
+.kpi-card:hover {
+  transform: scale(1.04) translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0,186,86,0.13);
+}
+.kpi-value {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #00ba56;
+}
+.kpi-label {
+  font-size: 1.07rem;
+  color: #222;
+}
+.section-title {
+  margin: 2rem 0 1rem 0;
+  font-size: 1.5rem;
+  color: #00ba56;
+  font-weight: 600;
+}
+.dashboard-table th, .dashboard-table td {
+  vertical-align: middle;
+}
+@media (max-width: 991px) {
+  .kpi-card { margin-bottom: 1.2rem;}
+}

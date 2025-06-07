@@ -1,16 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Añadir Parte de Trabajo{% endblock %}
-{% block content %}
+{% block extra_css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-<style>
-    .form-card { max-width: 600px; margin: 0 auto; border-radius: 1rem; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 2rem 2rem 1rem 2rem;}
-    .wizard-step { display: none; }
-    .wizard-step.active { display: block; animation: fadeIn .5s; }
-    .progress { height: 24px;}
-    .progress-bar { font-size: 1rem; }
-    .admin-section { border: 1.5px dashed #00ba56; background: #eaffec; border-radius: .7rem; padding: 1rem 1.3rem; margin-bottom: 1rem; margin-top: 1rem;}
-    @keyframes fadeIn { from { opacity: 0;} to { opacity: 1;} }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/add_work.css') }}">
+{% endblock %}
+{% block content %}
 <div class="form-card">
     <h2 class="mb-4 text-center"><i class="bi bi-file-earmark-plus"></i> Nuevo parte de trabajo</h2>
     <div class="progress mb-4">
@@ -126,31 +120,4 @@
         </div>
     {% endfor %}
 </div>
-<script>
-    let step = 1;
-    function gotoStep(n) {
-        for (let i = 1; i <= 3; i++) {
-            document.getElementById("step-" + i).classList.remove("active");
-        }
-        document.getElementById("step-" + n).classList.add("active");
-        // Actualizar barra de progreso
-        const pct = n * 33;
-        document.getElementById("progressBar").style.width = pct + "%";
-        document.getElementById("progressBar").innerText = `Paso ${n} de 3`;
-        step = n;
-        window.scrollTo({top: 0, behavior: "smooth"});
-    }
-    function toggleMateriales() {
-        let chk = document.getElementById('materialesSwitch');
-        let div = document.getElementById('materialesDiv');
-        div.style.display = chk.checked ? 'block' : 'none';
-        if (!chk.checked) {
-            document.querySelector('[name="materiales_usados"]').value = '';
-        }
-    }
-    document.addEventListener("DOMContentLoaded", function() {
-        gotoStep(1);
-        toggleMateriales();
-    });
-</script>
 {% endblock %}

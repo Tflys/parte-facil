@@ -1,0 +1,128 @@
+.hero {
+    background: linear-gradient(120deg, #d4f7dc 60%, #00ba56 100%);
+    animation: gradientBG 6s ease infinite alternate;
+    min-height: 340px;
+}
+@keyframes gradientBG {
+    0% { background-position: 0% 50% }
+    100% { background-position: 100% 50% }
+}
+.scale-up { animation: scaleUp 0.7s cubic-bezier(.39,.58,.57,1) both; }
+@keyframes scaleUp {
+    0% {transform: scale(.8);}
+    100% {transform: scale(1);}
+}
+.shadow-pop {
+    animation: shadowPop 1s cubic-bezier(.39,.58,.57,1) both;
+}
+@keyframes shadowPop {
+    0% {box-shadow: none;}
+    100% {box-shadow: 0 6px 24px 0 rgba(0,0,0,.15);}
+}
+.grayscale-hover { filter: grayscale(1); transition: filter .2s; }
+.grayscale-hover:hover { filter: grayscale(0); }
+
+/* Botón WhatsApp flotante */
+.whatsapp-float {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1050;
+  background: #25D366; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+}
+
+/* Botón llamada fijo en móvil */
+@media (max-width: 768px) {
+  .call-float {
+    position: fixed; bottom: 96px; right: 24px; z-index: 1050;
+    background: #00ba56; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  }
+}
+
+
+.hero {
+    background: linear-gradient(120deg, #d4f7dc 60%, #00ba56 100%);
+    animation: gradientBG 6s ease infinite alternate;
+    min-height: 340px;
+    background-position: 50% 50%;
+}
+@keyframes gradientBG {
+    0% { background-position: 0% 50% }
+    100% { background-position: 100% 50% }
+}
+.scale-up { animation: scaleUp 0.7s cubic-bezier(.39,.58,.57,1) both; }
+@keyframes scaleUp {
+    0% {transform: scale(.8);}
+    100% {transform: scale(1);}
+}
+.shadow-pop {
+    animation: shadowPop 1s cubic-bezier(.39,.58,.57,1) both;
+}
+@keyframes shadowPop {
+    0% {box-shadow: none;}
+    100% {box-shadow: 0 6px 24px 0 rgba(0,0,0,.15);}
+}
+.grayscale-hover { filter: grayscale(1); transition: filter .2s; }
+.grayscale-hover:hover { filter: grayscale(0); }
+
+/* --- Efecto hover en cards de servicio --- */
+.card-servicio {
+  transition: transform 0.3s, box-shadow 0.3s, border-bottom 0.3s;
+}
+.card-servicio:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 32px rgba(0,186,86,0.25);
+  border-bottom: 4px solid #00ba56;
+}
+
+/* --- FAQ icono rotatorio --- */
+.accordion-button::after {
+  transition: transform 0.3s;
+}
+.accordion-button:not(.collapsed)::after {
+  transform: rotate(90deg);
+}
+
+/* --- Botón WhatsApp flotante con pulso --- */
+.whatsapp-float {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1050;
+  background: #25D366; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+  display: flex; align-items: center; justify-content: center; font-size: 2rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  animation: pulso 1.5s infinite;
+}
+@keyframes pulso {
+  0% { box-shadow: 0 0 0 0 #25d36666; }
+  70% { box-shadow: 0 0 0 12px #25d36600; }
+  100% { box-shadow: 0 0 0 0 #25d36600; }
+}
+
+/* --- Botón llamada fijo en móvil --- */
+@media (max-width: 768px) {
+  .call-float {
+    position: fixed; bottom: 96px; right: 24px; z-index: 1050;
+    background: #00ba56; color: #fff; border-radius: 50%; width: 60px; height: 60px;
+    display: flex; align-items: center; justify-content: center; font-size: 2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  }
+}
+/* Animación mensaje de éxito */
+.animate__fadeInDown {
+  animation: fadeInDown 1s;
+}
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-30px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+
+/* Loader en el botón de envío */
+#btn-spinner { margin-left: 8px; }
+
+/* WhatsApp icon animado en hover */
+#icono-wsp {
+  transition: transform 0.2s;
+}
+#icono-wsp:hover {
+  transform: scale(1.25) rotate(-10deg);
+}
