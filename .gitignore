@@ -10,9 +10,9 @@ env/
 .venv/
 .Python
 
-# Environment variables
-.env
-*.env
+# Environment variables quitadas de momento
+# .env
+
 
 # Flask, SQLite database
 
