@@ -10,7 +10,7 @@ env/
 .venv/
 .Python
 
-# Environment variables quitadas de momento
+# Environment variables quitar en producción
 # .env
 
 
@@ -31,5 +31,5 @@ Thumbs.db
 *.log
 
 
-# Static uploads 
-static/uploads/
+# Static uploads quitar en producción
+# static/uploads/
