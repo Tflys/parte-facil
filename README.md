@@ -161,7 +161,7 @@ MIT License
 ### Vista de estadísticas dashboard
 ![Vista de estadísticas](static/images/dashboard.png)
 ### Vista de gestión de usuarios
-![Vista de clientes](static/images/vista_clientes.png)
+![Vista de gestión usuarios](static/images/gestion_usuarios.png)
 ---
 
 ## 📤 Ejemplo de exportación
