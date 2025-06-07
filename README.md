@@ -67,6 +67,12 @@ multiservicios-ortiz/
 ├── /instance/
 │     └── multiservicios.db
 ├── /static/
+│     ├── css/
+│     │     ├── styles.css
+│     │     └── ...
+│     ├── js/
+│     │     ├── scripts.js
+│     │     └── ...
 │     ├── images/
 │     │     ├── favicon.ico
 │     │     └── ...
@@ -113,8 +119,6 @@ Límite de tamaño de subida (MAX_CONTENT_LENGTH)
 
 Control estricto de roles y rutas
 
-SECRET_KEY fuerte (en .env o en la config)
-
 No debug en producción
 
 📈 Mejoras sugeridas y roadmap
@@ -137,7 +141,27 @@ Proyecto para Multiservicios Desatascos Ortiz S.L. y TOTAL POOL S.L.
 MIT License
 
 
+---
+## 🛠️ VISTAS
 
+### Vista de login
+![Vista de login](static/images/login.png)
+### Vista de partes de trabajo
+![Vista de partes](static/images/alta_parte_desktop.jpg)
+![Vista de partes móvil](static/images/vista_moviltablet.jpg)
+### Vista alta usuario
+![Vista alta usuario](static/images/alta_usuario.png)
+### Vista gestion de usuarios
+![Vista gestion usuarios](static/images/gestion_usuarios.png)
+### Vista de panel
+![Vista de panel](static/images/vista_panel.png)
+### Vista de calendario
+![Vista de calendario](static/images/vista_calendario.png)
+![Vista calendario](static/images/calendar.png)
+### Vista de estadísticas dashboard
+![Vista de estadísticas](static/images/dashboard.png)
+### Vista de gestión de usuarios
+![Vista de clientes](static/images/vista_clientes.png)
 ---
 
 ## 📤 Ejemplo de exportación
