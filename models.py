@@ -26,3 +26,24 @@ class Trabajo(db.Model):
     estado = db.Column(db.String(30), default='sin terminar')
     observaciones = db.Column(db.Text)
     id_trabajador = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    id_factura = db.Column(
+    db.Integer, 
+    db.ForeignKey('factura.id', name='fk_trabajo_id_factura'), 
+    nullable=True
+)
+
+
+
+class Factura(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    numero = db.Column(db.String(30), unique=True, nullable=False)
+    fecha = db.Column(db.DateTime, nullable=False)
+    cliente = db.Column(db.String(80), nullable=False)
+    total = db.Column(db.Float, nullable=False)
+    pdf = db.Column(db.String(120))  # Ruta al archivo PDF generado
+
+    trabajos = db.relationship('Trabajo', backref='factura', lazy=True)
+
+# Añade el campo id_factura a Trabajo si no lo tienes aún:
+if not hasattr(Trabajo, 'id_factura'):
+    Trabajo.id_factura = db.Column(db.Integer, db.ForeignKey('factura.id'), nullable=True)

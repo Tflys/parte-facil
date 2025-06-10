@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura {{ factura.numero }}</title>
+    <style>
+      body { font-family: Arial, sans-serif; color: #333; }
+      .header {
+        border-bottom: 2px solid #008f39;
+        margin-bottom: 18px;
+        padding-bottom: 8px;
+        display: flex;
+        align-items: center;
+      }
+      .logo {
+        width: 110px;
+        height: auto;
+      }
+      .empresa-info {
+        margin-left: 25px;
+      }
+      .titulo-factura {
+        text-align: right;
+        flex: 1;
+        color: #008f39;
+        font-size: 2em;
+        font-weight: bold;
+      }
+      .datos {
+        margin-bottom: 20px;
+        font-size: 0.97em;
+      }
+      .datos span {
+        display: inline-block;
+        min-width: 105px;
+        font-weight: bold;
+      }
+      .datos-cliente, .datos-empresa {
+        width: 48%;
+        display: inline-block;
+        vertical-align: top;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 18px;
+      }
+      th, td {
+        border: 1px solid #cfcfcf;
+        padding: 7px;
+        text-align: left;
+        font-size: 0.97em;
+      }
+      th {
+        background-color: #e8f5e9;
+        color: #008f39;
+      }
+      tr:nth-child(even) {
+        background-color: #f7f7f7;
+      }
+      .total-row td {
+        font-weight: bold;
+        color: #222;
+        border-top: 2px solid #008f39;
+        font-size: 1.07em;
+      }
+      .footer {
+        border-top: 1px solid #d0d0d0;
+        margin-top: 32px;
+        padding-top: 8px;
+        font-size: 0.95em;
+        color: #666;
+        text-align: center;
+      }
+    </style>
+</head>
+<body>
+    <div class="header">
+      <img class="logo" src="{{ url_for('static', filename='images/LOGa.png') }}">
+      <div class="empresa-info">
+        <strong>Multiservicios Desatascos Ortiz S.L.</strong><br>
+        CIF: B12345678<br>
+        C/ Ejemplo, 5, Salobreña (Granada)<br>
+        Email: info@desatascosortiz.es<br>
+        Tel: 666 123 456
+      </div>
+      <div class="titulo-factura">
+        FACTURA<br>
+        <span style="font-size: 1em; color:#333;">Nº {{ factura.numero }}</span>
+      </div>
+    </div>
+    <div class="datos">
+      <div class="datos-empresa">
+        <span>Fecha:</span> {{ factura.fecha.strftime('%Y-%m-%d') }}<br>
+        <span>Emitida por:</span> Multiservicios Desatascos Ortiz S.L.
+      </div>
+      <div class="datos-cliente">
+        <span>Nº Cliente:</span> {{ partes[0].id_trabajador if partes else '' }}<br>
+        <span>Cliente:</span> {{ factura.cliente }}<br>
+        <span>Dirección:</span> {{ partes[0].direccion if partes else '' }}<br>
+        <span>NIF:</span> {{ nif_cliente or '---' }}
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Trabajo realizado</th>
+          <th>Horas</th>
+          <th>Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in partes %}
+        <tr>
+            <td>{{ t.fecha.strftime('%Y-%m-%d') }}</td>
+            <td>{{ t.tipo_trabajo }}</td>
+            <td>{{ t.horas }}</td>
+            <td>{{ '%.2f' % (t.horas * 25) }} €</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td colspan="3" align="right">Base imponible:</td>
+            <td>{{ '%.2f' % base }} €</td>
+        </tr>
+        <tr>
+            <td colspan="3" align="right">IVA ({{ iva_porcentaje }}%):</td>
+            <td>{{ '%.2f' % iva }} €</td>
+        </tr>
+        <tr class="total-row">
+            <td colspan="3" align="right">Total factura:</td>
+            <td>{{ '%.2f' % factura.total }} €</td>
+        </tr>
+        </tbody>
+
+    </table>
+    <div class="footer">
+      <b>Condiciones de pago:</b> Transferencia bancaria en 30 días.<br>
+      <b>Banco:</b> Banco Ejemplo, IBAN: ES21 1234 5678 9101 1122 3344<br>
+      <b>Concepto:</b> Nº factura y nombre del cliente.<br>
+      Documento generado automáticamente por Parte-Fácil.<br>
+      <strong>Gracias por confiar en nosotros.</strong>
+    </div>
+</body>
+</html>

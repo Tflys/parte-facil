@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 class="mb-3">Facturas generadas</h2>
+
+{# ---- Formulario para generar factura ---- #}
+<div class="card mb-4">
+  <div class="card-header bg-success text-white">
+    <b>Generar nueva factura</b>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Tipo trabajo</th>
+            <th>Horas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in partes %}
+          <tr>
+            <td><input type="checkbox" name="partes" value="{{ p.id }}"></td>
+            <td>{{ p.fecha.strftime('%Y-%m-%d') }}</td>
+            <td>{{ p.cliente }}</td>
+            <td>{{ p.tipo_trabajo }}</td>
+            <td>{{ p.horas }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <button type="submit" class="btn btn-success">Generar Factura</button>
+    </form>
+    {% if not partes %}
+      <div class="alert alert-info mt-3">No hay partes pendientes de facturar.</div>
+    {% endif %}
+  </div>
+</div>
+
+{# ---- Tabla de facturas ---- #}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Nº Factura</th>
+      <th>Cliente</th>
+      <th>Fecha</th>
+      <th>Total (€)</th>
+      <th>PDF</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for factura in facturas %}
+    <tr>
+      <td>{{ factura.numero }}</td>
+      <td>{{ factura.cliente }}</td>
+      <td>{{ factura.fecha.strftime('%Y-%m-%d') }}</td>
+      <td>{{ '%.2f' % factura.total }}</td>
+      <td>
+        {% if factura.pdf %}
+          <a class="btn btn-sm btn-outline-primary" 
+             href="{{ url_for('descargar_factura_pdf', factura_id=factura.id) }}">
+            Descargar PDF
+          </a>
+          <a class="btn btn-sm btn-outline-secondary" target="_blank"
+             href="{{ url_for('ver_factura_pdf', factura_id=factura.id) }}">
+            Ver
+          </a>
+        {% else %}
+          <span class="text-danger">No generado</span>
+        {% endif %}
+        <form method="post" action="{{ url_for('borrar_factura', factura_id=factura.id) }}"
+              style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar esta factura? Se desvincularán sus partes.')">
+          <button type="submit" class="btn btn-sm btn-outline-danger">Borrar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

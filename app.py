@@ -565,6 +565,175 @@ def exportar_partes_pdf():
     return send_file(result, download_name=filename, as_attachment=True, mimetype='application/pdf')
 
 
+from models import Factura, Trabajo
+from datetime import datetime
+from flask import render_template, request, redirect, url_for, flash, send_file
+from io import BytesIO
+from xhtml2pdf import pisa
+
+
+@app.route('/admin/factura/<int:factura_id>/pdf')
+@login_required
+def descargar_factura_pdf(factura_id):
+    factura = Factura.query.get_or_404(factura_id)
+    partes = Trabajo.query.filter_by(id_factura=factura.id).all()
+    nif_cliente = getattr(partes[0], 'nif_cliente', None) if partes else None
+    html = render_template('factura_pdf.html', factura=factura, partes=partes, nif_cliente=nif_cliente)
+    result = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=result)
+    if pisa_status.err:
+        flash('Error al generar el PDF de la factura.', 'danger')
+        return redirect(url_for('dashboard'))
+    result.seek(0)
+    filename = f'factura_{factura.numero}.pdf'
+    return send_file(result, download_name=filename, as_attachment=True, mimetype='application/pdf')
+
+
+from xhtml2pdf import pisa
+@app.route('/admin/factura/<int:factura_id>/pdf')
+@login_required
+def factura_pdf(factura_id):
+    factura = Factura.query.get_or_404(factura_id)
+    partes = Trabajo.query.filter_by(id_factura=factura.id).all()
+    html = render_template('factura_pdf.html', factura=factura, partes=partes)
+    result = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=result)
+    if pisa_status.err:
+        flash('Error al generar el PDF de la factura.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    result.seek(0)
+    filename = f'factura_{factura.numero}.pdf'
+    return send_file(result, download_name=filename, as_attachment=True, mimetype='application/pdf')
+
+@app.route('/admin/factura/<int:factura_id>/ver')
+@login_required
+def ver_factura_pdf(factura_id):
+    factura = Factura.query.get_or_404(factura_id)
+    if not factura.pdf:
+        flash("La factura aún no tiene PDF generado.")
+        return redirect(url_for('listado_facturas'))
+    pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], factura.pdf)
+    return send_file(pdf_path, as_attachment=False)
+
+@app.route('/admin/factura/<int:factura_id>/borrar', methods=['POST'])
+@login_required
+def borrar_factura(factura_id):
+    if current_user.rol != "admin":
+        flash("Solo el administrador puede borrar facturas.")
+        return redirect(url_for('listado_facturas'))
+
+    factura = Factura.query.get_or_404(factura_id)
+
+    # 1. Desvincula los partes asociados y ponlos a pendiente_facturar
+    for parte in factura.trabajos:
+        parte.id_factura = None
+        parte.estado = 'pendiente_facturar'
+    db.session.commit()
+
+    # 2. Elimina el archivo PDF, si existe
+    if factura.pdf:
+        pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], factura.pdf)
+        try:
+            if os.path.exists(pdf_path):
+                os.remove(pdf_path)
+        except Exception as e:
+            print(f"Error borrando el PDF: {e}")
+
+    # 3. Borra la factura
+    db.session.delete(factura)
+    db.session.commit()
+
+    flash("Factura borrada correctamente. Los partes vuelven a estar pendientes de facturar.")
+    return redirect(url_for('listado_facturas'))
+@app.route('/admin/facturas', methods=['GET', 'POST'])
+@login_required
+def listado_facturas():
+    if current_user.rol != "admin":
+        flash("Solo el administrador puede ver y generar facturas.")
+        return redirect(url_for('dashboard'))
+
+    facturas = Factura.query.order_by(Factura.fecha.desc()).all()
+    partes = Trabajo.query.filter_by(estado='pendiente_facturar', id_factura=None).all()
+
+    if request.method == 'POST':
+        seleccionados = request.form.getlist('partes')
+        if not seleccionados:
+            flash("Debes seleccionar al menos un parte para facturar.")
+            return render_template('listado_facturas.html', facturas=facturas, partes=partes)
+
+        partes_seleccionados = Trabajo.query.filter(Trabajo.id.in_(seleccionados)).all()
+        clientes = set([t.cliente for t in partes_seleccionados])
+        if len(clientes) > 1:
+            flash("Solo puedes facturar partes del mismo cliente en una factura.")
+            return render_template('listado_facturas.html', facturas=facturas, partes=partes)
+        cliente = clientes.pop()
+
+        precio_hora = 25  # O el valor que corresponda
+        iva_porcentaje = 21  # O el IVA que apliques
+        # --- Cálculo correcto ---
+        base = sum([t.horas * precio_hora for t in partes_seleccionados])
+        iva = base * iva_porcentaje / 100
+        total = base + iva
+
+        ultimo = Factura.query.order_by(Factura.id.desc()).first()
+        nuevo_num = f"F{(ultimo.id + 1) if ultimo else 1:05d}"
+
+        factura = Factura(
+            numero=nuevo_num,
+            fecha=datetime.now(),
+            cliente=cliente,
+            total=total,
+        )
+        db.session.add(factura)
+        db.session.commit()
+
+        for t in partes_seleccionados:
+            t.id_factura = factura.id
+            t.estado = 'facturado'
+        db.session.commit()
+
+        # ============ Generar PDF de la factura ============
+        partes_factura = Trabajo.query.filter_by(id_factura=factura.id).all()
+        html = render_template(
+            'factura_pdf.html',
+            factura=factura,
+            partes=partes_factura,
+            base=base,
+            iva=iva,
+            iva_porcentaje=iva_porcentaje
+        )
+
+        from xhtml2pdf import pisa
+        from io import BytesIO
+        import os
+
+        pdf_buffer = BytesIO()
+        pisa_status = pisa.CreatePDF(html, dest=pdf_buffer)
+        if pisa_status.err:
+            flash('Error al generar el PDF de la factura.', 'danger')
+            return render_template('listado_facturas.html', facturas=facturas, partes=partes)
+
+        # Asegúrate de que la carpeta de uploads existe
+        upload_folder = app.config['UPLOAD_FOLDER']
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+
+        pdf_filename = f'factura_{factura.numero}.pdf'
+        pdf_path = os.path.join(upload_folder, pdf_filename)
+        with open(pdf_path, 'wb') as f:
+            f.write(pdf_buffer.getvalue())
+
+        factura.pdf = pdf_filename
+        db.session.commit()
+        # ============ Fin generación PDF ============
+
+        flash("Factura generada correctamente.")
+        return redirect(url_for('listado_facturas'))
+
+    return render_template('listado_facturas.html', facturas=facturas, partes=partes)
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
