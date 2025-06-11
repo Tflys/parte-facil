@@ -59,18 +59,17 @@
       <td>{{ '%.2f' % factura.total }}</td>
       <td>
         {% if factura.pdf %}
-          <a class="btn btn-sm btn-outline-primary" 
-             href="{{ url_for('descargar_factura_pdf', factura_id=factura.id) }}">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('facturas.descargar_factura_pdf', factura_id=factura.id) }}">
             Descargar PDF
           </a>
           <a class="btn btn-sm btn-outline-secondary" target="_blank"
-             href="{{ url_for('ver_factura_pdf', factura_id=factura.id) }}">
+             href="{{ url_for('facturas.ver_factura_pdf', factura_id=factura.id) }}">
             Ver
           </a>
         {% else %}
           <span class="text-danger">No generado</span>
         {% endif %}
-        <form method="post" action="{{ url_for('borrar_factura', factura_id=factura.id) }}"
+        <form method="post" action="{{ url_for('facturas.borrar_factura', factura_id=factura.id) }}"
               style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar esta factura? Se desvincularán sus partes.')">
           <button type="submit" class="btn btn-sm btn-outline-danger">Borrar</button>
         </form>

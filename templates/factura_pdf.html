@@ -89,6 +89,8 @@
         <span style="font-size: 1em; color:#333;">Nº {{ factura.numero }}</span>
       </div>
     </div>
+
+
     <div class="datos">
       <div class="datos-empresa">
         <span>Fecha:</span> {{ factura.fecha.strftime('%Y-%m-%d') }}<br>
@@ -101,39 +103,67 @@
         <span>NIF:</span> {{ nif_cliente or '---' }}
       </div>
     </div>
-    <table>
-      <thead>
+  <!-- MANO DE OBRA -->
+<h4>Desglose Mano de Obra</h4>
+<table class="table table-bordered">
+    <thead>
         <tr>
-          <th>Fecha</th>
-          <th>Trabajo realizado</th>
-          <th>Horas</th>
-          <th>Importe</th>
+            <th>Fecha</th>
+            <th>Trabajo</th>
+            <th>Horas</th>
+            <th>Precio/hora</th>
+            <th>Importe</th>
         </tr>
-      </thead>
-      <tbody>
-        {% for t in partes %}
+    </thead>
+    <tbody>
+        {% for parte in partes if parte.horas and parte.horas > 0 %}
         <tr>
-            <td>{{ t.fecha.strftime('%Y-%m-%d') }}</td>
-            <td>{{ t.tipo_trabajo }}</td>
-            <td>{{ t.horas }}</td>
-            <td>{{ '%.2f' % (t.horas * 25) }} €</td>
+            <td>{{ parte.fecha.strftime('%d/%m/%Y') }}</td>
+            <td>{{ parte.tipo_trabajo }}</td>
+            <td>{{ parte.horas }}</td>
+            <td>{{ precio_hora|round(2) }}</td>
+            <td>{{ (parte.horas * precio_hora)|round(2) }}</td>
         </tr>
         {% endfor %}
-        <tr>
-            <td colspan="3" align="right">Base imponible:</td>
-            <td>{{ '%.2f' % base }} €</td>
-        </tr>
-        <tr>
-            <td colspan="3" align="right">IVA ({{ iva_porcentaje }}%):</td>
-            <td>{{ '%.2f' % iva }} €</td>
-        </tr>
-        <tr class="total-row">
-            <td colspan="3" align="right">Total factura:</td>
-            <td>{{ '%.2f' % factura.total }} €</td>
-        </tr>
-        </tbody>
+    </tbody>
+</table>
+<p><b>Total Mano de Obra:</b> {{ base_mano_obra|round(2) }} €</p>
 
-    </table>
+<!-- MATERIALES -->
+<h4>Desglose Materiales</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Trabajo</th>
+            <th>Materiales</th>
+            <th>Importe Materiales (€)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for parte in partes if parte.importe_materiales and parte.importe_materiales > 0 %}
+        <tr>
+            <td>{{ parte.fecha.strftime('%d/%m/%Y') }}</td>
+            <td>{{ parte.tipo_trabajo }}</td>
+            <td>{{ parte.materiales_usados or "-" }}</td>
+            <td>{{ parte.importe_materiales|round(2) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p><b>Total Materiales:</b> {{ base_materiales|round(2) }} €</p>
+
+<!-- TOTALES GENERALES -->
+<hr>
+<p>
+    <b>Base mano de obra:</b> {{ base_mano_obra|round(2) }} €<br>
+    <b>Base materiales:</b> {{ base_materiales|round(2) }} €<br>
+    <b>Base imponible:</b> {{ base|round(2) }} €<br>
+    <b>IVA ({{ iva_porcentaje }}%):</b> {{ iva|round(2) }} €<br>
+    <b><big>Total factura:</big></b> <big>{{ total|round(2) }} €</big>
+</p>
+
+
     <div class="footer">
       <b>Condiciones de pago:</b> Transferencia bancaria en 30 días.<br>
       <b>Banco:</b> Banco Ejemplo, IBAN: ES21 1234 5678 9101 1122 3344<br>
@@ -141,5 +171,10 @@
       Documento generado automáticamente por Parte-Fácil.<br>
       <strong>Gracias por confiar en nosotros.</strong>
     </div>
+
+    <!-- Nota fiscal opcional -->
+<p style="font-size: 11px; color: #888;">
+    El presente documento tiene validez como factura a efectos fiscales. IVA incluido.
+</p>
 </body>
 </html>

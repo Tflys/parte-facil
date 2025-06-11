@@ -8,8 +8,10 @@
     <p class="lead mt-3">
         {{ error_message or "Se ha producido un error. Intenta de nuevo o contacta con el administrador." }}
     </p>
-    <a href="{{ request.referrer or url_for('dashboard') }}" class="btn btn-primary mt-4">
-        Volver atrás
-    </a>
+    <a href="{{ request.referrer or url_for('dashboard.dashboard') }}" class="btn btn-primary mt-4">
+    Volver al panel
+</a>
+
+
 </div>
 {% endblock %}

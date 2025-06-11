@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('empresa') }}">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.empresa') }}">
       <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Logo" height="32" style="vertical-align: middle;">
       <span>Portal de Gestión Parte-Facil</span>
     </a>
@@ -12,29 +12,29 @@
       {% if current_user.is_authenticated %}
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('dashboard') }}">Panel</a>
+            <a class="nav-link" href="{{url_for('dashboard.dashboard') }}">Panel</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('calendar') }}">Calendario</a>
+            <a class="nav-link" href="{{ url_for('dashboard.calendar') }}">Calendario</a>
           </li>
           {% if current_user.rol == 'admin' %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('alta_trabajador') }}">Alta usuario</a>
+              <a class="nav-link" href="{{ url_for('usuarios.alta_trabajador') }}">Alta usuario</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Estadísticas</a>
+              <a class="nav-link" href="{{ url_for('dashboard.admin_dashboard') }}">Estadísticas</a>
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('listado_usuarios') }}">Gestión usuarios</a>
+              <a class="nav-link" href="{{ url_for('usuarios.listado_usuarios') }}">Gestión usuarios</a>
             </li>
           
             <li>
-              <a class="nav-link" href="{{ url_for('listado_facturas') }}">Facturas</a>
+              <a class="nav-link" href="{{ url_for('facturas.listado_facturas') }}">Facturas</a>
             </li>
             
 
           {% endif %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('add_work') }}">Nuevo parte</a>
+            <a class="nav-link" href="{{ url_for('trabajos.add_work') }}">Nuevo parte</a>
           </li>
         </ul>
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -44,18 +44,18 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
               <li>
-                <a class="dropdown-item" href="{{ url_for('perfil') }}">
+                <a class="dropdown-item" href="{{ url_for('auth.perfil') }}">
                   <i class="bi bi-person"></i> Mi perfil
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" href="{{ url_for('cambiar_contrasena') }}">
+                <a class="dropdown-item" href="{{ url_for('auth.cambiar_contrasena') }}">
                   <i class="bi bi-key"></i> Cambiar contraseña
                 </a>
               </li>
               <li><hr class="dropdown-divider"></li>
               <li>
-                <a class="dropdown-item" href="{{ url_for('logout') }}">
+                <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
                   <i class="bi bi-box-arrow-right"></i> Cerrar sesión
                 </a>
               </li>
@@ -65,7 +65,7 @@
       {% else %}
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('login') }}">Acceso empleados</a>
+            <a class="nav-link" href="{{ url_for('auth.login') }}">Acceso empleados</a>
           </li>
         </ul>
       {% endif %}

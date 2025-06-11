@@ -30,11 +30,11 @@
           {% endif %}
         </td>
         <td>
-          <a href="{{ url_for('editar_usuario', user_id=u.id) }}" class="btn btn-sm btn-warning">
+          <a href="{{ url_for('usuarios.editar_usuario',  user_id=u.id) }}" class="btn btn-sm btn-warning">
             <i class="bi bi-pencil"></i> Editar
           </a>
           {% if u.id != current_user.id %}
-          <form action="{{ url_for('borrar_usuario', user_id=u.id) }}" method="post" style="display:inline-block;" onsubmit="return confirm('¿Seguro que quieres eliminar este usuario?');">
+          <form action="{{ url_for('usuarios.borrar_usuario', user_id=u.id) }}" method="post" style="display:inline-block;" onsubmit="return confirm('¿Seguro que quieres eliminar este usuario?');">
             <button class="btn btn-danger btn-sm" type="submit">
               <i class="bi bi-trash"></i> Eliminar
             </button>

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Resumen de importación</h2>
+  <p>Total de filas: {{ registros|length }}</p>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Fila</th><th>Datos</th><th>Errores</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for reg in registros %}
+      <tr {% if reg.errores %}class="table-danger"{% endif %}>
+        <td>{{ reg.fila }}</td>
+        <td>
+          {% for k,v in reg.datos.items() %}
+            <b>{{ k }}</b>: {{ v }}<br>
+          {% endfor %}
+        </td>
+        <td>
+          {% if reg.errores %}
+            {% for e in reg.errores %}
+              <span class="text-danger">{{ e }}</span><br>
+            {% endfor %}
+          {% else %}
+            <span class="text-success">OK</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if registros|selectattr("errores", "equalto", [])|list %}
+    <form method="POST" action="{{ url_for('importar.confirmar_importacion') }}">
+      {{ form.hidden_tag() }}
+      {{ form.data() }}
+      {{ form.submit(class="btn btn-primary") }}
+    </form>
+  {% else %}
+    <div class="alert alert-danger">No hay registros válidos para importar.</div>
+  {% endif %}
+{% endblock %}

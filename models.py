@@ -20,6 +20,7 @@ class Trabajo(db.Model):
     cliente = db.Column(db.String(80), nullable=False)
     horas = db.Column(db.Float, nullable=False, default=0)
     materiales_usados = db.Column(db.Text, nullable=True)
+    importe_materiales = db.Column(db.Float, nullable=True, default=0)
     firma = db.Column(db.String(120), nullable=True)  # Ruta del archivo
     foto = db.Column(db.String(120), nullable=True)   # Ruta del archivo
     terminado = db.Column(db.Boolean, default=False)

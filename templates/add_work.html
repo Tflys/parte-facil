@@ -57,6 +57,10 @@
                 <div id="materialesDiv" style="display:none;">
                     {{ form.materiales_usados(class="form-control mt-2", rows="2", placeholder="Ej: Tubo PVC, codo 90º...") }}
                 </div>
+                <div class="mb-3">
+                    {{ form.importe_materiales.label(class="form-label") }}
+                    {{ form.importe_materiales(class="form-control", step="0.01") }}
+                </div>
             </div>
             <div class="mb-3">
                 {{ form.observaciones.label(class="form-label") }}
@@ -111,7 +115,7 @@
                     <i class="bi bi-check-circle"></i> Guardar parte
                 </button>
             </div>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary mt-2 w-100">Cancelar</a>
+            <a href="{{url_for('dashboard.dashboard') }}" class="btn btn-outline-secondary mt-2 w-100">Cancelar</a>
         </div>
     </form>
     {% for field, errors in form.errors.items() %}

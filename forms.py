@@ -5,6 +5,7 @@ from wtforms import SelectField
 from flask_wtf import FlaskForm
 from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField, BooleanField, DateTimeField
 from wtforms import StringField, DateField, TextAreaField, FileField, PasswordField, SubmitField, SelectField, FloatField, BooleanField, DateTimeField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, NumberRange
 
 
 
@@ -26,6 +27,7 @@ class WorkForm(FlaskForm):
     cliente = StringField('Cliente', validators=[DataRequired()])
     
     materiales_usados = TextAreaField('Materiales usados')
+    importe_materiales = FloatField("Importe materiales (€)", validators=[Optional(), NumberRange(min=0)])
     horas = FloatField('Horas trabajadas', validators=[DataRequired(), NumberRange(min=0, max=24)])
     foto = FileField('Foto')
     firma = FileField('Firma')
@@ -85,3 +87,15 @@ class CambiarContrasenaAdminForm(FlaskForm):
     nueva = PasswordField('Nueva contraseña', validators=[Optional()])
     nueva2 = PasswordField('Repite la nueva contraseña', validators=[Optional(), EqualTo('nueva', message="Las contraseñas deben coincidir")])
     submit_c = SubmitField('Cambiar contraseña')
+
+from flask_wtf import FlaskForm
+from wtforms import FileField, SubmitField, HiddenField
+from wtforms.validators import DataRequired
+
+class ImportExcelForm(FlaskForm):
+    archivo = FileField('Archivo Excel', validators=[DataRequired()])
+    submit = SubmitField('Previsualizar')
+
+class ConfirmImportForm(FlaskForm):
+    data = HiddenField('Data serializada')  # Guardaremos los datos como JSON aquí
+    submit = SubmitField('Confirmar importación')

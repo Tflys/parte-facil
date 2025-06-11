@@ -4,17 +4,127 @@
 <h2 class="mb-4">Tus trabajos asignados</h2>
 {% if current_user.rol == "admin" %}
 <div class="d-flex justify-content-end mb-3">
-    <a href="{{ url_for('alta_trabajador') }}" class="btn btn-primary me-2">Alta trabajador</a>
-    <a href="{{ url_for('add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
-    <a href="{{ url_for('calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
-
+    <a href="{{ url_for('usuarios.alta_trabajador') }}" class="btn btn-primary me-2">Alta trabajador</a>
+    <a href="{{ url_for('trabajos.add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
+    <a href="{{ url_for('dashboard.calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
+    <a href="{{ url_for('importar.importar_excel') }}" class="btn btn-secondary ms-2">
+        <i class="bi bi-file-earmark-arrow-up"></i> Importar Excel
+    </a>
 </div>
+
+<form method="POST" action="" id="accion_masiva_form">
+    <div class="mb-2">
+        <select name="nuevo_estado" class="form-select d-inline" style="width:auto;display:inline-block;">
+            <option value="">Seleccionar nuevo estado</option>
+            <option value="pagado">Pagado</option>
+            <option value="pendiente_cobro">Pendiente cobro</option>
+            <option value="pendiente_facturar">Pendiente facturar</option>
+            <option value="sin_terminar">Sin terminar</option>
+        </select>
+        <button type="submit" formaction="{{ url_for('trabajos.cambiar_estado_masivo') }}" class="btn btn-primary ms-2">
+            Cambiar estado
+        </button>
+        <button type="submit" formaction="{{ url_for('trabajos.borrar_masivo') }}"
+            class="btn btn-danger ms-2"
+            onclick="return confirm('¿Seguro que quieres borrar los partes seleccionados?');">
+            Borrar seleccionados
+        </button>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th><input type="checkbox" id="checkAll"></th>
+                    <th>Acciones</th>
+                    <th>Fecha</th>
+                    <th>Dirección</th>
+                    <th>Tipo de trabajo</th>
+                    <th>Cliente</th>
+                    <th>Materiales usados</th>
+                    <th>Horas</th>
+                    <th>Observaciones</th>
+                    <th>Foto</th>
+                    <th>Firma</th>
+                    <th>Estado</th>
+                    <th>Trabajador</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trabajo in trabajos %}
+                <tr>
+                    <td><input type="checkbox" name="seleccionados" value="{{ trabajo.id }}"></td>
+                    <td>
+                        <a href="{{ url_for('trabajos.edit_work', work_id=trabajo.id) }}" class="btn btn-sm btn-warning mb-1">Editar</a>
+                        <form action="{{ url_for('trabajos.delete_work', work_id=trabajo.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar este parte?');">
+                            {{ form.hidden_tag() }}
+                            <button type="submit" class="btn btn-sm btn-danger mb-1">Borrar</button>
+                        </form>
+                    </td>
+                    <td>{{ trabajo.fecha.strftime('%d/%m/%Y') }}</td>
+                    <td>{{ trabajo.direccion }}</td>
+                    <td>{{ trabajo.tipo_trabajo }}</td>
+                    <td>{{ trabajo.cliente }}</td>
+                    <td>{{ trabajo.materiales_usados or "-" }}</td>
+                    <td>{{ trabajo.horas or "-" }}</td>
+                    <td>
+                        {% if trabajo.observaciones %}
+                            <span style="white-space: pre-line;">{{ trabajo.observaciones }}</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if trabajo.foto %}
+                            <a href="{{ url_for('static', filename='uploads/' ~ trabajo.foto) }}" target="_blank">Ver foto</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if trabajo.firma %}
+                            <a href="{{ url_for('static', filename='uploads/' ~ trabajo.firma) }}" target="_blank">Ver firma</a>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if trabajo.estado == "pagado" %}
+                            <span class="badge bg-success">Pagado</span>
+                        {% elif trabajo.estado == "pendiente_cobro" %}
+                            <span class="badge bg-warning text-dark">Pendiente cobro</span>
+                        {% elif trabajo.estado == "pendiente_facturar" %}
+                            <span class="badge bg-info text-dark">Pendiente facturar</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Sin terminar</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if trabajo.trabajador %}
+                            {{ trabajo.trabajador.nombre }}
+                        {% else %}
+                            {{ trabajo.id_trabajador }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<script>
+document.getElementById('checkAll')?.addEventListener('change', function() {
+    document.querySelectorAll('input[name="seleccionados"]').forEach(cb => {
+        cb.checked = this.checked;
+    });
+});
+</script>
+
 {% else %}
 <div class="d-flex justify-content-end mb-3">
-    <a href="{{ url_for('add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
-    <a href="{{ url_for('calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
+    <a href="{{ url_for('trabajos.add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
+    <a href="{{ url_for('dashboard.calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
 </div>
-{% endif %}
 
 <div class="table-responsive">
     <table class="table table-bordered table-striped align-middle">
@@ -30,24 +140,14 @@
                 <th>Observaciones</th>
                 <th>Foto</th>
                 <th>Firma</th>
-                {% if current_user.rol == "admin" %}
-                    <th>Estado</th>
-                    <th>Trabajador</th>
-                {% endif %}
             </tr>
         </thead>
         <tbody>
             {% for trabajo in trabajos %}
             <tr>
                 <td>
-                    {% if current_user.rol == "admin" or trabajo.id_trabajador == current_user.id %}
-                        <a href="{{ url_for('edit_work', work_id=trabajo.id) }}" class="btn btn-sm btn-warning mb-1">Editar</a>
-                    {% endif %}
-                    {% if current_user.rol == "admin" %}
-                        <form action="{{ url_for('delete_work', work_id=trabajo.id) }}" method="post" style="display:inline;" onsubmit="return confirm('¿Seguro que quieres borrar este parte?');">
-                            {{ form.hidden_tag() }}
-                            <button type="submit" class="btn btn-sm btn-danger mb-1">Borrar</button>
-                        </form>
+                    {% if trabajo.id_trabajador == current_user.id %}
+                        <a href="{{ url_for('trabajos.edit_work', work_id=trabajo.id) }}" class="btn btn-sm btn-warning mb-1">Editar</a>
                     {% endif %}
                 </td>
                 <td>{{ trabajo.fecha.strftime('%d/%m/%Y') }}</td>
@@ -77,31 +177,10 @@
                         -
                     {% endif %}
                 </td>
-                {% if current_user.rol == "admin" %}
-                    <td>
-                        {% if trabajo.estado == "pagado" %}
-                            <span class="badge bg-success">Pagado</span>
-                        {% elif trabajo.estado == "pendiente_cobro" %}
-                            <span class="badge bg-warning text-dark">Pendiente cobro</span>
-                        {% elif trabajo.estado == "pendiente_facturar" %}
-                            <span class="badge bg-info text-dark">Pendiente facturar</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Sin terminar</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if trabajo.trabajador %}
-                            {{ trabajo.trabajador.nombre }}
-                        {% else %}
-                            {{ trabajo.id_trabajador }}
-                        {% endif %}
-                    </td>
-                {% endif %}
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
-
+{% endif %}
 {% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Importar partes desde Excel</h2>
+  <form method="POST" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.archivo.label }}<br>
+      {{ form.archivo() }}
+    </div>
+    {{ form.submit(class="btn btn-success") }}
+  </form>
+{% endblock %}
