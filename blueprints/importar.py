@@ -170,6 +170,7 @@ def confirmar_importacion():
                     tipo_trabajo=limpio.get('Tipo trabajo', ''),
                     cliente=limpio.get('Cliente'),
                     materiales_usados=limpio.get('Materiales', ''),
+                    importe_materiales = safe_float(limpio.get('Importe_materiales')),
                     horas=safe_float(limpio.get('Horas')),
                     terminado=safe_bool(limpio.get('Terminado', False)),
                     estado=limpio.get('Estado', 'sin_terminar'),
