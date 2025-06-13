@@ -246,3 +246,53 @@ def exportar_partes_pdf():
     result.seek(0)
     filename = f'partes_{current_user.nombre}_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf'
     return send_file(result, download_name=filename, as_attachment=True, mimetype='application/pdf')
+from flask import jsonify
+
+@trabajos_bp.route('/api/trabajos')
+@login_required
+def api_trabajos():
+    cliente = request.args.get("cliente", "")
+    id_trabajador = request.args.get("trabajador", "")
+
+    query = Trabajo.query
+
+    if current_user.rol != "admin":
+        query = query.filter_by(id_trabajador=current_user.id)
+    else:
+        if id_trabajador:
+            query = query.filter_by(id_trabajador=int(id_trabajador))
+
+    if cliente:
+        query = query.filter_by(cliente=cliente)
+
+    trabajos = query.all()
+    eventos = []
+
+    estado_color = {
+        'pagado': '#4caf50',
+        'terminado': '#2196f3',
+        'pendiente cobro': '#ffc107',
+        'pendiente_cobro': '#ffc107',
+        'pendiente facturar': '#ff9800',
+        'pendiente_facturar': '#ff9800',
+        'sin_terminar': '#e74c3c',
+    }
+
+    for t in trabajos:
+        color = estado_color.get((t.estado or '').strip().lower(), '#999')
+        eventos.append({
+            "id": t.id,
+            "title": t.tipo_trabajo,
+            "start": t.fecha.isoformat(),
+            "end": t.fecha_fin.isoformat() if t.fecha_fin else None,
+            "direccion": t.direccion,
+            "materiales": t.materiales_usados,
+            "horas": t.horas,
+            "foto": t.foto,
+            "firma": t.firma,
+            "observaciones": t.observaciones,
+            "estado": t.estado,
+            "trabajador": t.trabajador.nombre if t.trabajador else None,
+            "color": color,
+        })
+    return jsonify(eventos)
