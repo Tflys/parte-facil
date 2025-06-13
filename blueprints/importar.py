@@ -1,191 +1,196 @@
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, send_file
 from flask_login import login_required, current_user
 from models import db, Trabajo, Usuario
 from forms import ImportExcelForm, ConfirmImportForm
-from werkzeug.security import generate_password_hash
+import os
 import pandas as pd
-import math
+from datetime import datetime
+from sqlalchemy.exc import SQLAlchemyError
 import json
+from io import BytesIO
 
 importar_bp = Blueprint('importar', __name__)
 
-def clean_value(val):
-    """Devuelve None si el valor es NaN, NaT, vacío o None."""
-    if val is None:
-        return None
-    try:
-        if pd.isna(val):
-            return None
-    except Exception:
-        pass
-    return val
+# ----------- 1. Subida y previsualización -----------
 
-def clean_fecha(val):
-    """Devuelve None si es NaT, NaN, None o string vacío; si no, un datetime."""
-    if val is None:
-        return None
-    try:
-        if isinstance(val, str) and not val.strip():
-            return None
-        fecha = pd.to_datetime(val)
-        if pd.isna(fecha) or str(fecha) == 'NaT':
-            return None
-        return fecha
-    except Exception:
-        return None
-
-def safe_float(val, default=None):
-    try:
-        v = clean_value(val)
-        if isinstance(v, str):
-            v = v.replace(',', '.')
-        return float(v) if v not in (None, '') else default
-    except Exception:
-        return default
-
-def safe_bool(val):
-    if val in [True, "TRUE", "True", "true", "1", 1]:
-        return True
-    if val in [False, "FALSE", "False", "false", "0", 0]:
-        return False
-    return False
-
-@importar_bp.route('/admin/importar_excel', methods=['GET', 'POST'])
+@importar_bp.route('/admin/importar_partes', methods=['GET', 'POST'])
 @login_required
-def importar_excel():
+def importar_partes():
     if current_user.rol != "admin":
-        flash("Solo el administrador puede importar datos.", "danger")
+        flash("Solo los administradores pueden importar partes.", "danger")
         return redirect(url_for('dashboard.dashboard'))
 
     form = ImportExcelForm()
     if form.validate_on_submit():
-        archivo = form.archivo.data
-        try:
-            df = pd.read_excel(archivo)
-        except Exception as e:
-            flash(f"Error leyendo el archivo Excel: {e}", "danger")
-            return render_template("importar_excel.html", form=form)
+        # Guardar archivo temporalmente
+        file = form.archivo.data
+        filename = f"import_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        upload_folder = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'uploads'), 'temp')
+        os.makedirs(upload_folder, exist_ok=True)
+        filepath = os.path.join(upload_folder, filename)
+        file.save(filepath)
 
-        registros = []
-        for idx, row in df.iterrows():
-            fila = row.to_dict()
-            error = []
-            # Validaciones:
-            if not fila.get('Fecha'):
-                error.append("Falta la fecha.")
-            if not fila.get('Dirección'):
-                error.append("Falta la dirección.")
-            if not fila.get('Cliente'):
-                error.append("Falta el cliente.")
-            horas_val = fila.get('Horas')
-            if horas_val is None or str(horas_val).strip() == '':
-                error.append("Faltan las horas trabajadas.")
-            else:
-                try:
-                    safe_float(horas_val)
-                except Exception:
-                    error.append(f"Horas no es numérico ('{horas_val}').")
+        # Procesar Excel y validar datos
+        partes, errores = procesar_excel(filepath)
 
-            registros.append({
-                "fila": idx + 2,
-                "datos": fila,
-                "errores": error
-            })
+        # Guardar datos serializados para confirmación
+        preview_data = [trabajo_to_dict(p) for p in partes]
+        confirm_form = ConfirmImportForm(data=json.dumps(preview_data))
 
-        datos_validos = [r for r in registros if not r["errores"]]
-        datos_json = json.dumps([r["datos"] for r in datos_validos], default=str)
-        confirm_form = ConfirmImportForm()
-        confirm_form.data.data = datos_json
+        # Previsualización en plantilla: partes válidos + errores
+        return render_template('previsualizar_import.html',
+                               partes=partes,
+                               errores=errores,
+                               confirm_form=confirm_form,
+                               excel_path=filepath)
 
-        return render_template(
-            "importar_excel_resumen.html",
-            registros=registros,
-            form=confirm_form
-        )
-    return render_template("importar_excel.html", form=form)
+    return render_template('importar_excel.html', form=form)
 
-@importar_bp.route('/admin/importar_excel/confirmar', methods=['POST'])
+
+# ----------- 2. Confirmación e importación real -----------
+
+@importar_bp.route('/admin/confirmar_importacion', methods=['POST'])
 @login_required
 def confirmar_importacion():
     if current_user.rol != "admin":
-        flash("No autorizado", "danger")
+        flash("Solo los administradores pueden importar partes.", "danger")
         return redirect(url_for('dashboard.dashboard'))
+
     form = ConfirmImportForm()
-    if form.validate_on_submit():
-        datos = json.loads(form.data.data)
-        count = 0
-        for d in datos:
-            limpio = {k: clean_value(v) for k, v in d.items()}
-            fecha = clean_fecha(limpio.get('Fecha'))
-            fecha_fin = clean_fecha(limpio.get('Fecha_fin'))
-            nombre_trabajador = str(limpio.get('Trabajador', '')).strip()
-            trabajador = Usuario.query.filter_by(nombre=nombre_trabajador).first() if nombre_trabajador else None
+    if not form.data.data:
+        flash("Datos de importación perdidos. Vuelve a importar el archivo.", "danger")
+        return redirect(url_for('importar.importar_partes'))
 
-            if not trabajador and nombre_trabajador:
-                email_generado = (
-                    nombre_trabajador.lower()
-                    .replace(" ", ".")
-                    .replace("ñ", "n")
-                    .replace("á", "a")
-                    .replace("é", "e")
-                    .replace("í", "i")
-                    .replace("ó", "o")
-                    .replace("ú", "u")
-                    + "@autogenerado.local"
-                )
-                suffix = 1
-                base_email = email_generado
-                while Usuario.query.filter_by(email=email_generado).first():
-                    email_generado = f"{base_email.split('@')[0]}{suffix}@autogenerado.local"
-                    suffix += 1
+    try:
+        partes_data = json.loads(form.data.data)
+    except Exception:
+        flash("Error leyendo los datos para importar.", "danger")
+        return redirect(url_for('importar.importar_partes'))
 
-                password_generado = "cambiar123"
-                trabajador = Usuario(
-                    nombre=nombre_trabajador,
-                    email=email_generado,
-                    contraseña=generate_password_hash(password_generado),
-                    rol="trabajador"
-                )
-                db.session.add(trabajador)
-                db.session.flush()
+    # Backup antes de modificar nada
+    backup_excel = exportar_backup_excel()
+    if backup_excel:
+        backup_name = f'backup_trabajos_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+        backup_path = os.path.join(current_app.config.get('UPLOAD_FOLDER', 'uploads'), backup_name)
+        with open(backup_path, 'wb') as f:
+            f.write(backup_excel.getbuffer())
 
-            id_trabajador = trabajador.id if trabajador else 1
-
-            id_factura = limpio.get('id_factura')
-            if isinstance(id_factura, float) and math.isnan(id_factura):
-                id_factura = None
-            elif id_factura in ('', None):
-                id_factura = None
-            else:
-                try:
-                    id_factura = int(id_factura)
-                except Exception:
-                    id_factura = None
-
-            try:
-                t = Trabajo(
-                    fecha=fecha,
-                    fecha_fin=fecha_fin,
-                    direccion=limpio.get('Dirección'),
-                    tipo_trabajo=limpio.get('Tipo trabajo', ''),
-                    cliente=limpio.get('Cliente'),
-                    materiales_usados=limpio.get('Materiales', ''),
-                    importe_materiales = safe_float(limpio.get('Importe_materiales')),
-                    horas=safe_float(limpio.get('Horas')),
-                    terminado=safe_bool(limpio.get('Terminado', False)),
-                    estado=limpio.get('Estado', 'sin_terminar'),
-                    observaciones=limpio.get('Observaciones', ''),
-                    id_trabajador=id_trabajador,
-                    id_factura=id_factura,
-                    firma=limpio.get('firma'),
-                    foto=limpio.get('foto')
-                )
-                db.session.add(t)
-                count += 1
-            except Exception as e:
-                print(f"Error en registro: {limpio} => {e}")
+    # Importación atómica
+    try:
+        for data in partes_data:
+            trabajo = Trabajo(**data)
+            db.session.add(trabajo)
         db.session.commit()
-        flash(f"{count} registros importados correctamente. Usuarios nuevos creados automáticamente si era necesario.", "success")
-        return redirect(url_for('dashboard.dashboard'))
-    flash("Error en la importación.", "danger")
-    return redirect(url_for('importar.importar_excel'))
+        flash(f"{len(partes_data)} partes importados correctamente.", "success")
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        flash(f"Error en la importación. No se importó ningún parte. {str(e)}", "danger")
+        return redirect(url_for('importar.importar_partes'))
+
+    return redirect(url_for('dashboard.dashboard'))
+
+
+# ----------- Funciones de soporte -----------
+
+def procesar_excel(filepath):
+    df = pd.read_excel(filepath)
+    partes = []
+    errores = []
+    for idx, row in df.iterrows():
+        try:
+            nombre_trabajador = str(row.get("Nombre Trabajador", "")).strip()
+            if not nombre_trabajador:
+                errores.append((idx+2, "Nombre de trabajador vacío"))
+                continue
+            trabajador = Usuario.query.filter_by(nombre=nombre_trabajador).first()
+            if not trabajador:
+                errores.append((idx+2, f"Trabajador '{nombre_trabajador}' no existe"))
+                continue
+            # Fechas
+            fecha = pd.to_datetime(row.get("Fecha"), errors='coerce')
+            fecha_fin = pd.to_datetime(row.get("Fecha_fin"), errors='coerce') if row.get("Fecha_fin") else None
+            if pd.isnull(fecha):
+                errores.append((idx+2, "Fecha inválida"))
+                continue
+            # Estado y terminado
+            terminado = str(row.get("Terminado", "")).strip().lower() in ["si", "sí", "1", "true", "x"]
+            estado = str(row.get("Estado", "sin_terminar")).strip().lower().replace(" ", "_")
+            if estado not in ["pagado", "pendiente_cobro", "pendiente_facturar", "sin_terminar"]:
+                errores.append((idx+2, f"Estado no válido: {estado}"))
+                continue
+            # Duplicados
+            existe = Trabajo.query.filter_by(
+                fecha=fecha,
+                id_trabajador=trabajador.id,
+                tipo_trabajo=row.get("Tipo_trabajo")
+            ).first()
+            if existe:
+                errores.append((idx+2, "Duplicado, ya existe en la base de datos"))
+                continue
+            # Crea objeto
+            trabajo = Trabajo(
+                fecha=fecha,
+                fecha_fin=fecha_fin,
+                direccion=row.get("Dirección", ""),
+                tipo_trabajo=row.get("Tipo_trabajo", ""),
+                cliente=row.get("Cliente", ""),
+                horas=float(row.get("Horas", 0)),
+                materiales_usados=row.get("Materiales_usados", ""),
+                importe_materiales=float(row.get("Importe_materiales", 0) or 0),
+                terminado=terminado,
+                estado=estado,
+                observaciones=row.get("Observaciones", ""),
+                id_trabajador=trabajador.id
+            )
+            partes.append(trabajo)
+        except Exception as e:
+            errores.append((idx+2, f"Error inesperado: {e}"))
+    return partes, errores
+
+def trabajo_to_dict(trabajo):
+    # Serializa el objeto para importar luego
+    return {
+        "fecha": trabajo.fecha,
+        "fecha_fin": trabajo.fecha_fin,
+        "direccion": trabajo.direccion,
+        "tipo_trabajo": trabajo.tipo_trabajo,
+        "cliente": trabajo.cliente,
+        "horas": trabajo.horas,
+        "materiales_usados": trabajo.materiales_usados,
+        "importe_materiales": trabajo.importe_materiales,
+        "terminado": trabajo.terminado,
+        "estado": trabajo.estado,
+        "observaciones": trabajo.observaciones,
+        "id_trabajador": trabajo.id_trabajador,
+    }
+
+def exportar_backup_excel():
+    # Exporta todos los trabajos a Excel como backup
+    try:
+        trabajos = Trabajo.query.all()
+        data = []
+        for t in trabajos:
+            data.append({
+                'Fecha': t.fecha,
+                'Fecha_fin': t.fecha_fin,
+                'Dirección': t.direccion,
+                'Tipo_trabajo': t.tipo_trabajo,
+                'Cliente': t.cliente,
+                'Horas': t.horas,
+                'Materiales_usados': t.materiales_usados,
+                'Importe_materiales': t.importe_materiales,
+                'Terminado': t.terminado,
+                'Estado': t.estado,
+                'Observaciones': t.observaciones,
+                'Nombre Trabajador': t.trabajador.nombre if t.trabajador else ''
+            })
+        df = pd.DataFrame(data)
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False)
+        output.seek(0)
+        return output
+    except Exception as e:
+        print(f"Backup de Excel falló: {e}")
+        return None
+

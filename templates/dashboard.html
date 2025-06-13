@@ -2,34 +2,100 @@
 {% block title %}Panel de Trabajo{% endblock %}
 {% block content %}
 <h2 class="mb-4">Tus trabajos asignados</h2>
+
 {% if current_user.rol == "admin" %}
-<div class="d-flex justify-content-end mb-3">
-    <a href="{{ url_for('usuarios.alta_trabajador') }}" class="btn btn-primary me-2">Alta trabajador</a>
+<div class="d-flex flex-wrap justify-content-end mb-3 gap-2">
+    <a href="{{ url_for('usuarios.alta_trabajador') }}" class="btn btn-primary">Alta trabajador</a>
     <a href="{{ url_for('trabajos.add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
-    <a href="{{ url_for('dashboard.calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
-    <a href="{{ url_for('importar.importar_excel') }}" class="btn btn-secondary ms-2">
+    <a href="{{ url_for('dashboard.calendar') }}" class="btn btn-info">Ver calendario</a>
+    <a href="{{ url_for('importar.importar_partes') }}" class="btn btn-secondary">
         <i class="bi bi-file-earmark-arrow-up"></i> Importar Excel
     </a>
 </div>
 
+<form method="get" class="row g-2 align-items-end mb-3">
+    <!-- Cliente -->
+    <div class="col-md-2">
+        <label for="filtroCliente" class="form-label mb-0">Cliente</label>
+        <select id="filtroCliente" name="cliente" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for c in clientes %}
+            <option value="{{ c }}" {% if c == cliente_filtro %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- Trabajador -->
+    <div class="col-md-2">
+        <label for="filtroTrabajador" class="form-label mb-0">Trabajador</label>
+        <select id="filtroTrabajador" name="trabajador" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for t in trabajadores %}
+            <option value="{{ t.id }}" {% if t.id|string == trabajador_filtro %}selected{% endif %}>{{ t.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <!-- Día -->
+    <div class="col-md-2">
+        <label for="filtroDia" class="form-label mb-0">Día</label>
+        <input type="date" id="filtroDia" name="dia" value="{{ dia_filtro or '' }}" class="form-control" onchange="this.form.submit()">
+    </div>
+    <!-- Mes -->
+    <div class="col-md-2">
+        <label for="filtroMes" class="form-label mb-0">Mes</label>
+        <input type="month" id="filtroMes" name="mes" value="{{ mes_filtro or '' }}" class="form-control" onchange="this.form.submit()">
+    </div>
+    <!-- Dirección -->
+    <div class="col-md-2">
+        <label for="filtroDireccion" class="form-label mb-0">Dirección</label>
+        <input type="text" id="filtroDireccion" name="direccion" value="{{ direccion_filtro }}" class="form-control" placeholder="Filtrar por dirección...">
+    </div>
+    <!-- Observaciones -->
+    <div class="col-md-2">
+        <label for="filtroObservaciones" class="form-label mb-0">Observaciones</label>
+        <input type="text" id="filtroObservaciones" class="form-control" placeholder="Filtrar por observaciones...">
+    </div>
+    <div class="col-12 text-end align-self-end mt-2">
+        <strong class="fs-5">Total horas mostradas: <span id="sumaHoras">{{ suma_horas|round(2) }}</span></strong>
+        
+    </div>
+</form>
+
+
+
+<div class="mb-3 text-end">
+    <a href="{{ url_for('trabajos.exportar_partes_excel', cliente=cliente_filtro, direccion=direccion_filtro, trabajador=trabajador_filtro) }}"
+       class="btn btn-outline-success">
+        Exportar a Excel
+    </a>
+    <a href="{{ url_for('trabajos.exportar_partes_pdf', cliente=cliente_filtro, direccion=direccion_filtro, trabajador=trabajador_filtro) }}"
+       class="btn btn-outline-danger ms-2">
+        <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
+    </a>
+</div>
+
 <form method="POST" action="" id="accion_masiva_form">
-    <div class="mb-2">
-        <select name="nuevo_estado" class="form-select d-inline" style="width:auto;display:inline-block;">
+    <div class="mb-2 d-flex align-items-center gap-2 flex-wrap">
+        <select name="nuevo_estado" class="form-select w-auto">
             <option value="">Seleccionar nuevo estado</option>
             <option value="pagado">Pagado</option>
             <option value="pendiente_cobro">Pendiente cobro</option>
             <option value="pendiente_facturar">Pendiente facturar</option>
             <option value="sin_terminar">Sin terminar</option>
         </select>
-        <button type="submit" formaction="{{ url_for('trabajos.cambiar_estado_masivo') }}" class="btn btn-primary ms-2">
+        <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-outline-secondary ms-2">
+            Limpiar filtros
+        </a>
+        <button type="submit" formaction="{{ url_for('trabajos.cambiar_estado_masivo') }}" class="btn btn-primary">
             Cambiar estado
         </button>
         <button type="submit" formaction="{{ url_for('trabajos.borrar_masivo') }}"
-            class="btn btn-danger ms-2"
+            class="btn btn-danger"
             onclick="return confirm('¿Seguro que quieres borrar los partes seleccionados?');">
             Borrar seleccionados
         </button>
     </div>
+ 
+
     <div class="table-responsive">
         <table class="table table-bordered table-striped align-middle">
             <thead class="table-dark">
@@ -111,6 +177,27 @@
         </table>
     </div>
 </form>
+<script>
+function aplicarFiltros() {
+    const filtroDireccion = document.getElementById('filtroDireccion').value.toLowerCase();
+    const filtroObs = document.getElementById('filtroObservaciones').value.toLowerCase();
+    let suma = 0;
+    document.querySelectorAll('table tbody tr').forEach(row => {
+        const direccion = row.querySelector('td:nth-child(4)')?.textContent.toLowerCase() || "";
+        const observaciones = row.querySelector('td:nth-child(9)')?.textContent.toLowerCase() || "";
+        const horasCell = row.querySelector('td:nth-child(8)');
+        const horas = horasCell ? parseFloat(horasCell.textContent.replace(',', '.')) || 0 : 0;
+        const visible = direccion.includes(filtroDireccion) && observaciones.includes(filtroObs);
+        row.style.display = visible ? '' : 'none';
+        if (visible) suma += horas;
+    });
+    document.getElementById('sumaHoras').textContent = suma.toFixed(2);
+}
+
+document.getElementById('filtroDireccion')?.addEventListener('input', aplicarFiltros);
+document.getElementById('filtroObservaciones')?.addEventListener('input', aplicarFiltros);
+</script>
+
 
 <script>
 document.getElementById('checkAll')?.addEventListener('change', function() {
@@ -121,9 +208,9 @@ document.getElementById('checkAll')?.addEventListener('change', function() {
 </script>
 
 {% else %}
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-end mb-3 gap-2">
     <a href="{{ url_for('trabajos.add_work') }}" class="btn btn-success">Añadir parte de trabajo</a>
-    <a href="{{ url_for('dashboard.calendar') }}" class="btn btn-info ms-2">Ver calendario</a>
+    <a href="{{ url_for('dashboard.calendar') }}" class="btn btn-info">Ver calendario</a>
 </div>
 
 <div class="table-responsive">

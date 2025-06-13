@@ -186,13 +186,24 @@ from flask import send_file
 @trabajos_bp.route('/exportar/partes/excel')
 @login_required
 def exportar_partes_excel():
-    # Filtrado según rol
-    if current_user.rol == "admin":
-        partes = Trabajo.query.all()
-    else:
-        partes = Trabajo.query.filter_by(id_trabajador=current_user.id).all()
+    # Toma los mismos filtros de request.args
+    cliente = request.args.get("cliente", "")
+    direccion = request.args.get("direccion", "")
+    trabajador = request.args.get("trabajador", "")
 
-    # Preparar datos para DataFrame
+    query = Trabajo.query
+    if current_user.rol != "admin":
+        query = query.filter_by(id_trabajador=current_user.id)
+    else:
+        if cliente:
+            query = query.filter(Trabajo.cliente == cliente)
+        if direccion:
+            query = query.filter(Trabajo.direccion.ilike(f"%{direccion}%"))
+        if trabajador:
+            query = query.filter(Trabajo.id_trabajador == int(trabajador))
+
+    partes = query.all()
+
     data = []
     for t in partes:
         data.append({
@@ -212,30 +223,48 @@ def exportar_partes_excel():
         flash("No hay partes para exportar.", "info")
         return redirect(url_for('dashboard.dashboard'))
     df = pd.DataFrame(data)
-
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Partes de trabajo')
 
     output.seek(0)
     filename = f'partes_{current_user.nombre}_{datetime.now().strftime("%Y%m%d_%H%M")}.xlsx'
-    return send_file(output, download_name=filename, as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    # Mantén los filtros en la URL al descargar
+    return send_file(output, download_name=filename, as_attachment=True,
+                     mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+from flask import render_template, send_file, request, redirect, url_for, flash
+from io import BytesIO
 from xhtml2pdf import pisa
-from flask import render_template
+import pandas as pd
+from datetime import datetime
 
 @trabajos_bp.route('/exportar/partes/pdf')
 @login_required
 def exportar_partes_pdf():
-    if current_user.rol == "admin":
-        partes = Trabajo.query.all()
+    # Filtros de la request (como en el dashboard)
+    cliente = request.args.get("cliente", "")
+    direccion = request.args.get("direccion", "")
+    trabajador = request.args.get("trabajador", "")
+
+    query = Trabajo.query
+    if current_user.rol != "admin":
+        query = query.filter_by(id_trabajador=current_user.id)
     else:
-        partes = Trabajo.query.filter_by(id_trabajador=current_user.id).all()
+        if cliente:
+            query = query.filter(Trabajo.cliente == cliente)
+        if direccion:
+            query = query.filter(Trabajo.direccion.ilike(f"%{direccion}%"))
+        if trabajador:
+            query = query.filter(Trabajo.id_trabajador == int(trabajador))
+
+    partes = query.all()
 
     if not partes:
         flash("No hay partes para exportar.", "info")
         return redirect(url_for('dashboard.dashboard'))
 
+    # Renderiza el HTML del PDF (usa tu plantilla personalizada)
     html = render_template('partes_pdf.html', partes=partes)
     result = BytesIO()
     pisa_status = pisa.CreatePDF(html, dest=result)
@@ -245,7 +274,10 @@ def exportar_partes_pdf():
 
     result.seek(0)
     filename = f'partes_{current_user.nombre}_{datetime.now().strftime("%Y%m%d_%H%M")}.pdf'
+    # Mantén los filtros en la URL al descargar
     return send_file(result, download_name=filename, as_attachment=True, mimetype='application/pdf')
+
+
 from flask import jsonify
 
 @trabajos_bp.route('/api/trabajos')

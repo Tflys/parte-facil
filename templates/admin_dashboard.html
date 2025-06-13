@@ -1,58 +1,102 @@
 {% extends "base.html" %}
-{% block title %}Estadísticas - Dashboard Admin{% endblock %}
+{% block title %}Panel de Estadísticas{% endblock %}
 {% block content %}
-<h2 class="mb-4">Panel de Estadísticas</h2>
-{% if not demo %}
-    <p class="text-muted">Bienvenido al panel de estadísticas. Aquí puedes ver un resumen de la actividad de la aplicación.</p>
-{% else %}
-    <p class="text-muted">Estás viendo datos simulados en modo demo. Los datos no son reales.</p>
+
+<h2 class="mb-4">Panel de Estadísticas y KPIs</h2>
+
+<!-- Alerta de partes críticos -->
+{% if partes_criticos %}
+<div class="alert alert-danger">
+    <strong>¡Atención!</strong> Hay {{ partes_criticos|length }} partes críticos (más de 7 días sin terminar o pendientes):
+    <ul>
+    {% for parte in partes_criticos %}
+        <li>
+            {{ parte.fecha.strftime('%d/%m/%Y') }} - 
+            {{ parte.trabajador.nombre if parte.trabajador else '' }} 
+            ({{ parte.estado }}) - Cliente: {{ parte.cliente }}
+        </li>
+    {% endfor %}
+    </ul>
+</div>
 {% endif %}
 
-<div class="mb-3 text-end">
-  {% if demo %}
-    <a href="{{ url_for('dashboard.admin_dashboard') }}" class="btn btn-outline-secondary">
-      <i class="bi bi-eye"></i> Volver a modo real
-    </a>
-    <span class="badge bg-warning text-dark ms-3" style="font-size:1rem;">
-      <i class="bi bi-exclamation-triangle"></i> Estás viendo datos simulados (demo)
-    </span>
-  {% else %}
-    <a href="{{ url_for('dashboard.admin_dashboard', demo=1) }}" class="btn btn-outline-primary">
-      <i class="bi bi-play-circle"></i> Modo demo
-    </a>
-  {% endif %}
-</div>
+<!-- Filtros avanzados -->
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-md-2">
+        <label for="filtroAnio" class="form-label mb-0">Año</label>
+        <select name="anio" id="filtroAnio" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for a in anios %}
+            <option value="{{ a }}" {% if a|string == anio_filtro %}selected{% endif %}>{{ a }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="filtroMes" class="form-label mb-0">Mes</label>
+        <select name="mes" id="filtroMes" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for m in meses %}
+            <option value="{{ m[0] }}" {% if m[0]|string == mes_filtro %}selected{% endif %}>{{ m[1] }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="filtroTrabajador" class="form-label mb-0">Trabajador</label>
+        <select id="filtroTrabajador" name="trabajador" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for t in trabajadores %}
+            <option value="{{ t.id }}" {% if t.id|string == trabajador_filtro %}selected{% endif %}>{{ t.nombre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="filtroCliente" class="form-label mb-0">Cliente</label>
+        <select id="filtroCliente" name="cliente" class="form-select" onchange="this.form.submit()">
+            <option value="">Todos</option>
+            {% for c in clientes %}
+            <option value="{{ c }}" {% if c == cliente_filtro %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2 text-end align-self-end">
+        <a href="{{ url_for('dashboard.admin_dashboard') }}" class="btn btn-outline-secondary">Limpiar filtros</a>
+    </div>
+</form>
 
+<!-- KPIs comparativos -->
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card text-bg-primary mb-3">
             <div class="card-body">
-                <h5 class="card-title">Partes registrados</h5>
-                <p class="display-5">{{ total_trabajos or 0 }}</p>
+                <h5 class="card-title">Partes registrados (mes actual)</h5>
+                <p class="display-5">{{ partes_periodo }}</p>
+                <div class="fs-6">{{ comp_partes|safe }} respecto al mes anterior</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-bg-success mb-3">
             <div class="card-body">
-                <h5 class="card-title">Trabajadores</h5>
-                <p class="display-5">{{ total_trabajadores or 0 }}</p>
+                <h5 class="card-title">Trabajadores activos</h5>
+                <p class="display-5">{{ total_trabajadores }}</p>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-bg-warning mb-3">
             <div class="card-body">
-                <h5 class="card-title">Horas totales</h5>
-                <p class="display-5">{{ horas_totales or 0 }}</p>
+                <h5 class="card-title">Horas totales (mes actual)</h5>
+                <p class="display-5">{{ horas_periodo }}</p>
+                <div class="fs-6">{{ comp_horas|safe }} respecto al mes anterior</div>
             </div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card text-bg-info mb-3">
             <div class="card-body">
-                <h5 class="card-title">Clientes distintos</h5>
-                <p class="display-5">{{ clientes_distintos or 0 }}</p>
+                <h5 class="card-title">Clientes distintos (mes actual)</h5>
+                <p class="display-5">{{ clientes_periodo }}</p>
+                <div class="fs-6">{{ comp_clientes|safe }} respecto al mes anterior</div>
             </div>
         </div>
     </div>
@@ -86,13 +130,14 @@
     </div>
 </div>
 
-<a href="{{ url_for('trabajos.exportar_partes_excel') }}" class="btn btn-outline-success mb-4">
-    Exportar a Excel
-</a>
-
-<a href="{{ url_for('trabajos.exportar_partes_pdf') }}" class="btn btn-outline-danger mb-4">
-  <i class="bi bi-file-earmark-pdf"></i> Exportar partes a PDF
-</a>
+<div class="mb-3 text-end">
+    <a href="{{ url_for('trabajos.exportar_partes_excel', anio=anio_filtro, mes=mes_filtro, cliente=cliente_filtro, trabajador=trabajador_filtro) }}" class="btn btn-outline-success">
+        Exportar a Excel (filtros)
+    </a>
+    <a href="{{ url_for('trabajos.exportar_partes_pdf', anio=anio_filtro, mes=mes_filtro, cliente=cliente_filtro, trabajador=trabajador_filtro) }}" class="btn btn-outline-danger ms-2">
+        <i class="bi bi-file-earmark-pdf"></i> Exportar a PDF
+    </a>
+</div>
 
 <h4 class="mt-4">Evolución mensual de partes</h4>
 <canvas id="trabajosMesChart" width="600" height="300"></canvas>
@@ -128,7 +173,7 @@
     <tbody>
         {% for parte in ultimos_partes or [] %}
         <tr>
-            <td>{{ parte.fecha.strftime('%Y-%m-%d') if parte.fecha else '' }}</td>
+            <td>{{ parte.fecha.strftime('%d/%m/%Y') if parte.fecha else '' }}</td>
             <td>{{ parte.trabajador.nombre if parte.trabajador else '' }}</td>
             <td>{{ parte.cliente }}</td>
             <td>{{ parte.estado }}</td>
@@ -139,6 +184,7 @@
 
 <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary mt-3">Volver al panel</a>
 {% endblock %}
+
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
