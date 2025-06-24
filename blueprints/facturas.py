@@ -8,16 +8,6 @@ from xhtml2pdf import pisa
 
 facturas_bp = Blueprint('facturas', __name__)
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request
-from flask_login import login_required, current_user
-from models import Factura, Trabajo, db
-from datetime import datetime
-from io import BytesIO
-from xhtml2pdf import pisa
-import os
-
-facturas_bp = Blueprint('facturas', __name__)
-
 @facturas_bp.route('/admin/facturas', methods=['GET', 'POST'])
 @login_required
 def listado_facturas():
