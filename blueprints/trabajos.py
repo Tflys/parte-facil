@@ -1,15 +1,24 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    url_for,
+    flash,
+    request,
+    send_file,
+    jsonify,
+    current_app,
+)
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from models import Trabajo, Usuario, db
 from forms import WorkForm, EmptyForm
 from utils import allowed_image
-import os
+from io import BytesIO
+from xhtml2pdf import pisa
 import pandas as pd
 from datetime import datetime
-
-from io import BytesIO
-from flask import send_file
+import os
 
 trabajos_bp = Blueprint('trabajos', __name__)
 
@@ -179,9 +188,6 @@ def borrar_masivo():
     return redirect(url_for('dashboard.dashboard'))
 
 
-import pandas as pd
-from io import BytesIO
-from flask import send_file
 
 @trabajos_bp.route('/exportar/partes/excel')
 @login_required
@@ -233,11 +239,6 @@ def exportar_partes_excel():
     return send_file(output, download_name=filename, as_attachment=True,
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-from flask import render_template, send_file, request, redirect, url_for, flash
-from io import BytesIO
-from xhtml2pdf import pisa
-import pandas as pd
-from datetime import datetime
 
 @trabajos_bp.route('/exportar/partes/pdf')
 @login_required
@@ -278,7 +279,6 @@ def exportar_partes_pdf():
     return send_file(result, download_name=filename, as_attachment=True, mimetype='application/pdf')
 
 
-from flask import jsonify
 
 @trabajos_bp.route('/api/trabajos')
 @login_required
